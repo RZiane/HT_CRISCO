@@ -3,7 +3,6 @@ from tkinter import filedialog
 import re
 import xml.etree.ElementTree as ET
 import os
-import copy
 from utils import indent_xml
 from utils import build_div
 from utils import extract_stats
@@ -20,8 +19,8 @@ def punct_settings():
     global fenetre_options_punct
     fenetre_options_punct = Toplevel()
     fenetre_options_punct.title("Punctuation Settings")
-    fenetre_options_punct.geometry("320x240")
-    fenetre_options_punct.minsize(320, 240)
+    fenetre_options_punct.geometry("240x380")
+    fenetre_options_punct.minsize(240, 380)
     fenetre_options_punct.config(bg="white")
 
     global CheckVar1
@@ -108,8 +107,8 @@ def len_settings():
     global fenetre_options_len
     fenetre_options_len = Toplevel()
     fenetre_options_len.title("Long sentences length")
-    fenetre_options_len.geometry("400x120")
-    fenetre_options_len.minsize(400, 120)
+    fenetre_options_len.geometry("280x120")
+    fenetre_options_len.minsize(280, 120)
     fenetre_options_len.config(bg="white")
 
     global entry
@@ -207,9 +206,7 @@ def saveFile():
     file = re.sub("\n####\s\d*\s####\n\n", '', file)
     file = file.split('\n\n')
     #file = ''.join(file)
-    
-    print(file)
-    
+        
     file2 = []
     for i in file:
 
@@ -278,7 +275,7 @@ def saveFile():
     #corpus.append(list_header)
     '''
     sent_cnt = 0
-    print(list_ponct_fortes)
+    #print(list_ponct_fortes)
     global punct_forte_selec
     try:
         punct_forte_selec = []
@@ -552,8 +549,8 @@ def saveFile():
 fenetre = Tk()
 
 fenetre.title("Text to XML")
-fenetre.geometry("1080x480")
-fenetre.minsize(480, 360)
+fenetre.geometry("1080x520")
+fenetre.minsize(1080, 520)
 fenetre.config(bg="white")
 
 label_title = Label(fenetre, text="Convert your .txt file into .xml",

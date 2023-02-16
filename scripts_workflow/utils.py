@@ -1,7 +1,7 @@
 import sys, getopt
 import xml.etree.ElementTree as ET
 import statistics
-import tkinter
+import copy
 
 def def_args(argv):
    inputfile = ''
