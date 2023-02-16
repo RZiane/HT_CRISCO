@@ -4,77 +4,13 @@ import re
 import xml.etree.ElementTree as ET
 import os
 import copy
+from utils import indent_xml
+from utils import build_div
+from utils import extract_stats
+from utils import extract_lg_sents
 
 #os.system('Xvfb :1 -screen 0 1600x1200x16  &')    # create virtual display with size 1600x1200 and 16 bit color. Color can be changed to 24 or 8
 os.environ['DISPLAY']=':1.0'    # tell X clients to use our virtual DISPLAY :1.0
-
-def indent(elem, level=0, more_sibs=False):
-        i = "\n"
-        if level:
-            i += (level-1) * '\t'
-        num_kids = len(elem)
-        if num_kids:
-            if not elem.text or not elem.text.strip():
-                elem.text = i + "\t"
-                if level:
-                    elem.text += '\t'
-            count = 0
-            for kid in elem:
-                indent(kid, level+1, count < num_kids - 1)
-                count += 1
-            if not elem.tail or not elem.tail.strip():
-                elem.tail = i
-                if more_sibs:
-                    elem.tail += '\t'
-        else:
-            if level and (not elem.tail or not elem.tail.strip()):
-                elem.tail = i
-                if more_sibs:
-                    elem.tail += '\t'
-
-def build_div(root, div_type):
-    
-    type_ = str(div_type)
-    
-    x = [ele.tag for ele in list(root)]
-    if 'head' in x:
-        for id_, ele in enumerate(list(root)):        
-            if ele.tag == 'head':
-                if list(root)[id_+1].tag!='head':
-
-                    new_head = ET.Element("head")
-                    new_head.text = ele.text
-
-                    ele.tag = 'div'
-                    ele.set ('type', type_)
-                    ele.text = ''
-
-                    ele.append(new_head)
-
-                    for ele2 in list(root)[id_+1:]:
-                        if ele2.tag != 'head':
-                            ele2_clone = copy.deepcopy(ele2)
-                            ele.append(ele2_clone)
-                            ele2.set('append', 'yes')
-                        else:
-                            break
-    else:
-        # fabrication nouvel élément div
-        new_div = ET.Element("div")
-        new_div.set ('type', type_)
-        for id_, ele in enumerate(list(root)):
-
-            ele_clone = copy.deepcopy(ele)
-            new_div.append(ele_clone)
-            ele.set('append', 'yes')
-
-        root.insert(id_, new_div)
-
-    for id_, ele in enumerate(list(root)):           
-        if ele.get('append') == 'yes':
-            root.remove(ele)
-    
-    return root
 
 def onClick_punct():
     CheckVar1, CheckVar2 = punct_settings()
@@ -210,118 +146,7 @@ def set_options_len():
 def build_len_sent_option():
     global len_sent_option_var
     len_sent_option_var = int(len_sent_option)
-    return len_sent_option_var
-
-def extract_stats():
-    
-    import statistics
-    
-    tree = ET.parse(open(cible, encoding='utf-8'))
-    
-    list_len = []
-    nb_sent = 0
-    
-    for sent in tree.findall('.//s'):
-        len_sent = 0
-        nb_sent += 1
-        for w in sent.findall('.//w'):
-            len_sent += 1
-        
-        list_len.append(int(len_sent))
-    
-    try:
-        len_sent_option_var = build_len_sent_option()
-    except NameError:
-        len_sent_option_var = None
-
-    cnt_lg = 0
-    list_len_lg = []
-    for i in list_len:
-        if len_sent_option_var==None:
-            if i>80:
-                list_len_lg.append(i)
-                cnt_lg += 1
-        else:
-            if i>int(len_sent_option_var):
-                list_len_lg.append(i)
-                cnt_lg += 1
-            
-    print('Nb_phrases_longues: '+ str(cnt_lg)+' sur un total de '+str(nb_sent)+' phrases' )
-    print("Après découpe au point-virgule dans les phrases trop longues: ")
-    print("\tmoyenne du total: ", statistics.mean(list_len))
-    print("\tmediane du total: ", statistics.median(list_len))
-    print("\tmoyenne des phrases trop longues: ", statistics.mean(list_len_lg))
-    print("\tmediane des phrases trop longues: ", statistics.median(list_len_lg))
-    print("\tmax des phrases trop longues: ", sorted(list_len_lg)[len(list_len_lg)-1])                    
-
-def extract_lg_sents():
-        
-    tree = ET.parse(open(cible, encoding='utf-8'))
-    
-    list_sents = []
-    nb_sent = 0
-    
-    for sent in tree.findall('.//s'):
-        len_sent = 0
-        nb_sent += 1
-        text_sent = []
-        for w in sent.findall('.//w'):
-            len_sent += 1
-            
-            if len(w)!=0:
-                for choice in w.findall('.//choice'):
-                    for choice in w.findall('.//choice'):
-                        for sic, corr in zip(w.findall('.//sic'), w.findall('.//corr')):
-                            form = corr.text
-                            sic = str(sic.text)
-
-                    for choice in w.findall('.//choice'):
-                        for orig, reg in zip(w.findall('.//orig'), w.findall('.//reg')):
-                            form = reg.text
-                            orig = str(orig.text)
-            else:
-                form = w.text
-            
-            text_sent.append(form)
-        
-        try:
-            len_sent_option_var = build_len_sent_option()
-        except NameError:
-            len_sent_option_var = None
-        
-        if len_sent_option_var==None:
-            if len_sent > 80:
-                x = str(nb_sent)+' \ len: '+str(len_sent)+' \ "too_long"'+'\n'+' '.join(text_sent)
-                list_sents.append(x)
-            else:
-                x = str(nb_sent)+' \ len: '+str(len_sent)+'\n'+' '.join(text_sent)
-                list_sents.append(x)
-        else:
-            if len_sent > len_sent_option_var:
-                x = str(nb_sent)+' \ len: '+str(len_sent)+' \ "too_long"'+'\n'+' '.join(text_sent)
-                list_sents.append(x)
-            else:
-                x = str(nb_sent)+' \ len: '+str(len_sent)+'\n'+' '.join(text_sent)
-                list_sents.append(x)
-        
-            
-    global cible_txt
-    cible_txt = filedialog.asksaveasfilename(initialdir=dir_file,
-                                         title="Select a File",
-                                         filetypes=(("Text files",
-                                                     "*.txt*"),
-                                                    ("all files",
-                                                     "*.*")))
-    
-    cible_txt = cible_txt.rstrip('.txt')+'.txt'
-    
-    with open(cible_txt, "w", encoding="utf-8") as out:
-        for i in list_sents:
-            out.write(i)
-            out.write('\n')
-            out.write('\n') 
-    
-    label_txt_file_downloaded.pack()
+    return len_sent_option_var                    
 
 def upload_path():
     global source_path
@@ -499,10 +324,8 @@ def saveFile():
             
             if i.startswith('<head>'):
                 list_para.append(i)
-                print("head/ ", i)
             else:
                 para = re.split(regex_split_sents, i)
-                print("para: ", i)
 
                 # gestion du niveau phrase
                 for S in para:
@@ -718,7 +541,7 @@ def saveFile():
     root = build_div(root, 'section')
     root = build_div(root, 'chapter')
     root = build_div(root, 'book')
-    indent(root)
+    indent_xml(root)
     ET.ElementTree(root).write(cible, encoding="utf-8")
 
     label_close.pack()
