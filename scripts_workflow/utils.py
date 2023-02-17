@@ -2,6 +2,7 @@ import sys, getopt
 import xml.etree.ElementTree as ET
 import statistics
 import copy
+from tqdm import tqdm
 
 def def_args(argv):
    inputfile = ''
@@ -96,7 +97,7 @@ def make_d_PRESTO(path_PRESTO):
 
     #parsing du fichier .dff et création du dictionnaire python
     d_PRESTO = {}
-    for entry in PRESTO:
+    for entry in tqdm(PRESTO):
         entry = entry.rstrip("\n")
         entry = entry.split("/")
         if entry[0] in d_PRESTO:
