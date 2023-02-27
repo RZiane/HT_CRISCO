@@ -1,85 +1,15 @@
-from __future__ import annotations
-
 from tkinter import *
 from tkinter import filedialog
-
-import customtkinter
-
 import re
 import xml.etree.ElementTree as ET
 import os
-import copy
+from utils import indent_xml
+from utils import build_div
+from utils import extract_stats
+from utils import extract_lg_sents
 
 #os.system('Xvfb :1 -screen 0 1600x1200x16  &')    # create virtual display with size 1600x1200 and 16 bit color. Color can be changed to 24 or 8
 os.environ['DISPLAY']=':1.0'    # tell X clients to use our virtual DISPLAY :1.0
-
-def indent(elem, level=0, more_sibs=False):
-        i = "\n"
-        if level:
-            i += (level-1) * '\t'
-        num_kids = len(elem)
-        if num_kids:
-            if not elem.text or not elem.text.strip():
-                elem.text = i + "\t"
-                if level:
-                    elem.text += '\t'
-            count = 0
-            for kid in elem:
-                indent(kid, level+1, count < num_kids - 1)
-                count += 1
-            if not elem.tail or not elem.tail.strip():
-                elem.tail = i
-                if more_sibs:
-                    elem.tail += '\t'
-        else:
-            if level and (not elem.tail or not elem.tail.strip()):
-                elem.tail = i
-                if more_sibs:
-                    elem.tail += '\t'
-
-def build_div(root, div_type):
-    
-    type_ = str(div_type)
-    
-    x = [ele.tag for ele in list(root)]
-    if 'head' in x:
-        for id_, ele in enumerate(list(root)):        
-            if ele.tag == 'head':
-                if list(root)[id_+1].tag!='head':
-
-                    new_head = ET.Element("head")
-                    new_head.text = ele.text
-
-                    ele.tag = 'div'
-                    ele.set ('type', type_)
-                    ele.text = ''
-
-                    ele.append(new_head)
-
-                    for ele2 in list(root)[id_+1:]:
-                        if ele2.tag != 'head':
-                            ele2_clone = copy.deepcopy(ele2)
-                            ele.append(ele2_clone)
-                            ele2.set('append', 'yes')
-                        else:
-                            break
-    else:
-        # fabrication nouvel élément div
-        new_div = ET.Element("div")
-        new_div.set ('type', type_)
-        for id_, ele in enumerate(list(root)):
-
-            ele_clone = copy.deepcopy(ele)
-            new_div.append(ele_clone)
-            ele.set('append', 'yes')
-
-        root.insert(id_, new_div)
-
-    for id_, ele in enumerate(list(root)):           
-        if ele.get('append') == 'yes':
-            root.remove(ele)
-    
-    return root
 
 def onClick_punct():
     CheckVar1, CheckVar2 = punct_settings()
@@ -92,14 +22,17 @@ def select_all_boxes():
     CheckVar5.set(1)
     CheckVar6.set(1)
 
+def reset_select_all_boxes():
+    CheckVar7.set(0)
 
 def punct_settings():
     
     global fenetre_options_punct
     fenetre_options_punct = Toplevel()
     fenetre_options_punct.title("Punctuation Settings")
-    fenetre_options_punct.geometry("320x240")
-    fenetre_options_punct.minsize(320, 240)
+    fenetre_options_punct.geometry("240x380")
+    fenetre_options_punct.minsize(240, 380)
+    fenetre_options_punct.config(bg="white")
 
     global CheckVar1
     global CheckVar2
@@ -117,30 +50,30 @@ def punct_settings():
     CheckVar6 = IntVar()
     CheckVar7 = IntVar()
 
-    C1 = customtkinter.CTkCheckBox(fenetre_options_punct, text = " . (full stop)", variable = CheckVar1, \
-                     onvalue = 1, offvalue = 0)
+    C1 = Checkbutton(fenetre_options_punct, text = " . (full stop)", variable = CheckVar1, \
+                     command=reset_select_all_boxes, onvalue = 1, offvalue = 0, height=2, width = 30, bg="white")
 
-    C2 = customtkinter.CTkCheckBox(fenetre_options_punct, text = " ; (semi-colon)", variable = CheckVar2, \
-                     onvalue = 1, offvalue = 0)
+    C2 = Checkbutton(fenetre_options_punct, text = " ; (semi-colon)", variable = CheckVar2, \
+                     command=reset_select_all_boxes, onvalue = 1, offvalue = 0, height=2, width = 30, bg="white")
 
-    C3 = customtkinter.CTkCheckBox(fenetre_options_punct, text = " ? (question mark)", variable = CheckVar3, \
-                     onvalue = 1, offvalue = 0)
+    C3 = Checkbutton(fenetre_options_punct, text = " ? (question mark)", variable = CheckVar3, \
+                     command=reset_select_all_boxes, onvalue = 1, offvalue = 0, height=2, width = 30, bg="white")
 
-    C4 = customtkinter.CTkCheckBox(fenetre_options_punct, text = " ! (exclamation mark)", variable = CheckVar4, \
-                     onvalue = 1, offvalue = 0)
+    C4 = Checkbutton(fenetre_options_punct, text = " ! (exclamation mark)", variable = CheckVar4, \
+                     command=reset_select_all_boxes, onvalue = 1, offvalue = 0, height=2, width = 30, bg="white")
 
-    C5 = customtkinter.CTkCheckBox(fenetre_options_punct, text = " : (colon)", variable = CheckVar5, \
-                     onvalue = 1, offvalue = 0)
+    C5 = Checkbutton(fenetre_options_punct, text = " : (colon)", variable = CheckVar5, \
+                     command=reset_select_all_boxes, onvalue = 1, offvalue = 0, height=2, width = 30, bg="white")
     
-    C6 = customtkinter.CTkCheckBox(fenetre_options_punct, text = " ... (ellipsis)", variable = CheckVar6, \
-                     onvalue = 1, offvalue = 0)
+    C6 = Checkbutton(fenetre_options_punct, text = " ... (ellipsis)", variable = CheckVar6, \
+                     command=reset_select_all_boxes, onvalue = 1, offvalue = 0, height=2, width = 30, bg="white")
+    
+    C7 = Checkbutton(fenetre_options_punct, text = "Select all punctuations", variable = CheckVar7, \
+                     command=select_all_boxes, onvalue = 1, offvalue = 0, height=2, width = 30, bg="white")
 
-    C7 = customtkinter.CTkCheckBox(fenetre_options_punct, text = "Select all punctuations", variable = CheckVar7, \
-                     command=select_all_boxes, onvalue = 1, offvalue = 0)
-
-
-    empty = customtkinter.CTkLabel(master=fenetre_options_punct, 
-                        text="")
+    empty = Label(fenetre_options_punct, 
+                        text="",
+                        font=("Ubuntu", 12), fg="black", bg="white")
     empty.pack()
 
     C7.pack()
@@ -153,7 +86,8 @@ def punct_settings():
     C6.pack()
     
     
-    bouton_set_options_punct = customtkinter.CTkButton(master=fenetre_options_punct, text="SET OPTIONS", command=set_options_punct)
+    bouton_set_options_punct = Button(fenetre_options_punct, text="SET OPTIONS",
+                       command=set_options_punct, fg="#4065A4", bg="white")
     
     bouton_set_options_punct.pack()
         
@@ -170,31 +104,37 @@ def set_options_punct():
     points_suspension = ('...', CheckVar6.get())
     points_suspension2 = ('…', CheckVar6.get())
     
-    all_puncts = ('all', CheckVar7.get())
-    
+    #all_puncts = ('all', CheckVar7.get())
+    '''
     if all_puncts[1]==1:
         list_ponct_fortes = [('.', 1), (';', 1), ('?', 1), ('!', 1), (':', 1), ('...', 1), ('…', 1)]
     else:
-        list_ponct_fortes = [point, point_virgule, point_interrogation, point_exclamation, deux_points, points_suspension, points_suspension2]
+    '''
+    list_ponct_fortes = [point, point_virgule, point_interrogation, point_exclamation, deux_points, points_suspension, points_suspension2]
     
     fenetre_options_punct.destroy()
+    print(list_ponct_fortes)
 
 def len_settings():
     
     global fenetre_options_len
     fenetre_options_len = Toplevel()
     fenetre_options_len.title("Long sentences length")
-    fenetre_options_len.geometry("400x120")
-    fenetre_options_len.minsize(400, 120)
+    fenetre_options_len.geometry("280x120")
+    fenetre_options_len.minsize(280, 120)
+    fenetre_options_len.config(bg="white")
 
     global entry
-    empty = customtkinter.CTkLabel(master=fenetre_options_len, 
-                        text="")
-    entry = customtkinter.CTkEntry(master=fenetre_options_len, width=3)
-    label_entry1 = customtkinter.CTkLabel(master=fenetre_options_len, 
-                        text="'Too-long' sentence starts at")
-    label_entry2 = customtkinter.CTkLabel(master=fenetre_options_len, 
-                        text="tokens.")
+    empty = Label(fenetre_options_len, 
+                        text="",
+                        font=("Ubuntu", 12), fg="black", bg="white")
+    entry = Entry(fenetre_options_len, width=3)
+    label_entry1 = Label(fenetre_options_len, 
+                        text="'Too-long' sentence starts at",
+                        font=("Ubuntu", 12), fg="black", bg="white")
+    label_entry2 = Label(fenetre_options_len, 
+                        text="tokens.",
+                        font=("Ubuntu", 12), fg="black", bg="white")
     empty.grid(row=0,column=0)                    
     label_entry1.grid(row=1,column=0)
     #label_entry1.pack()
@@ -203,7 +143,8 @@ def len_settings():
     label_entry2.grid(row=1,column=2)
     #label_entry2.pack()
     
-    bouton_set_options_len = customtkinter.CTkButton(master=fenetre_options_len, text="SET OPTIONS", command=set_options_len)
+    bouton_set_options_len = Button(fenetre_options_len, text="SET OPTIONS",
+                       command=set_options_len, fg="#4065A4", bg="white")
     bouton_set_options_len.grid(row=3, columnspan=3)
     #bouton_set_options_len.pack(side=BOTTOM)
 
@@ -217,118 +158,7 @@ def set_options_len():
 def build_len_sent_option():
     global len_sent_option_var
     len_sent_option_var = int(len_sent_option)
-    return len_sent_option_var
-
-def extract_stats():
-    
-    import statistics
-    
-    tree = ET.parse(open(cible, encoding='utf-8'))
-    
-    list_len = []
-    nb_sent = 0
-    
-    for sent in tree.findall('.//s'):
-        len_sent = 0
-        nb_sent += 1
-        for w in sent.findall('.//w'):
-            len_sent += 1
-        
-        list_len.append(int(len_sent))
-    
-    try:
-        len_sent_option_var = build_len_sent_option()
-    except NameError:
-        len_sent_option_var = None
-
-    cnt_lg = 0
-    list_len_lg = []
-    for i in list_len:
-        if len_sent_option_var==None:
-            if i>80:
-                list_len_lg.append(i)
-                cnt_lg += 1
-        else:
-            if i>int(len_sent_option_var):
-                list_len_lg.append(i)
-                cnt_lg += 1
-            
-    print('Nb_phrases_longues: '+ str(cnt_lg)+' sur un total de '+str(nb_sent)+' phrases' )
-    print("Après découpe au point-virgule dans les phrases trop longues: ")
-    print("\tmoyenne du total: ", statistics.mean(list_len))
-    print("\tmediane du total: ", statistics.median(list_len))
-    print("\tmoyenne des phrases trop longues: ", statistics.mean(list_len_lg))
-    print("\tmediane des phrases trop longues: ", statistics.median(list_len_lg))
-    print("\tmax des phrases trop longues: ", sorted(list_len_lg)[len(list_len_lg)-1])                    
-
-def extract_lg_sents():
-        
-    tree = ET.parse(open(cible, encoding='utf-8'))
-    
-    list_sents = []
-    nb_sent = 0
-    
-    for sent in tree.findall('.//s'):
-        len_sent = 0
-        nb_sent += 1
-        text_sent = []
-        for w in sent.findall('.//w'):
-            len_sent += 1
-            
-            if len(w)!=0:
-                for choice in w.findall('.//choice'):
-                    for choice in w.findall('.//choice'):
-                        for sic, corr in zip(w.findall('.//sic'), w.findall('.//corr')):
-                            form = corr.text
-                            sic = str(sic.text)
-
-                    for choice in w.findall('.//choice'):
-                        for orig, reg in zip(w.findall('.//orig'), w.findall('.//reg')):
-                            form = reg.text
-                            orig = str(orig.text)
-            else:
-                form = w.text
-            
-            text_sent.append(form)
-        
-        try:
-            len_sent_option_var = build_len_sent_option()
-        except NameError:
-            len_sent_option_var = None
-        
-        if len_sent_option_var==None:
-            if len_sent > 80:
-                x = str(nb_sent)+' \ len: '+str(len_sent)+' \ "too_long"'+'\n'+' '.join(text_sent)
-                list_sents.append(x)
-            else:
-                x = str(nb_sent)+' \ len: '+str(len_sent)+'\n'+' '.join(text_sent)
-                list_sents.append(x)
-        else:
-            if len_sent > len_sent_option_var:
-                x = str(nb_sent)+' \ len: '+str(len_sent)+' \ "too_long"'+'\n'+' '.join(text_sent)
-                list_sents.append(x)
-            else:
-                x = str(nb_sent)+' \ len: '+str(len_sent)+'\n'+' '.join(text_sent)
-                list_sents.append(x)
-        
-            
-    global cible_txt
-    cible_txt = filedialog.asksaveasfilename(initialdir=dir_file,
-                                         title="Select a File",
-                                         filetypes=(("Text files",
-                                                     "*.txt*"),
-                                                    ("all files",
-                                                     "*.*")))
-    
-    cible_txt = cible_txt.rstrip('.txt')+'.txt'
-    
-    with open(cible_txt, "w", encoding="utf-8") as out:
-        for i in list_sents:
-            out.write(i)
-            out.write('\n')
-            out.write('\n') 
-    
-    label_txt_file_downloaded.pack()
+    return len_sent_option_var                    
 
 def upload_path():
     global source_path
@@ -348,7 +178,9 @@ def browseFile():
 
     var_msg = "This file is uploaded:\n"+source_path+""
 
-    label_upload = customtkinter.CTkLabel(master=frame, text=var_msg)
+    label_upload = Label(frame,
+                        text=var_msg,                       
+                        font=("Ubuntu", 10), fg="black", bg="white")
 
     label_upload.pack()
 
@@ -380,16 +212,14 @@ def saveFile():
 
     f.close()
 
-    # Prétraitement Rouillé
+    # Prétraitement
 
     file = ''.join(file)
     file = re.sub("#### 1 ####\n\n", '', file)
     file = re.sub("\n####\s\d*\s####\n\n", '', file)
     file = file.split('\n\n')
     #file = ''.join(file)
-    
-    print(file)
-    
+        
     file2 = []
     for i in file:
 
@@ -401,12 +231,7 @@ def saveFile():
         for x in m:
             sub = x[0].replace('.', '#1')
             i = i.replace(x[0], sub)
-        '''
-        m = re.finditer('(?![MIJVXLCDmijvxlcd])\s*\.', i)
-        for x in m:
-            sub = x[0].replace('.', '#1')
-            i = i.replace(x[0], sub)
-        '''
+            
         # nombre arabe
         m = re.finditer('([0-9]+\.\s[^A-Z])', i)
         for x in m:
@@ -458,7 +283,7 @@ def saveFile():
     #corpus.append(list_header)
     '''
     sent_cnt = 0
-    print(list_ponct_fortes)
+
     global punct_forte_selec
     try:
         punct_forte_selec = []
@@ -504,10 +329,8 @@ def saveFile():
             
             if i.startswith('<head>'):
                 list_para.append(i)
-                print("head/ ", i)
             else:
                 para = re.split(regex_split_sents, i)
-                print("para: ", i)
 
                 # gestion du niveau phrase
                 for S in para:
@@ -716,69 +539,85 @@ def saveFile():
                             out.write('</s>\n')
                         out.write('</p>\n')
         out.write('</body>\n')
+    try:
+        tree = ET.parse(open(cible, encoding='utf-8'))
+        root = tree.getroot()
+        
+        root = build_div(root, 'section')
+        root = build_div(root, 'chapter')
+        root = build_div(root, 'book')
+        indent_xml(root)
+        ET.ElementTree(root).write(cible, encoding="utf-8")
 
-    tree = ET.parse(open(cible, encoding='utf-8'))
-    root = tree.getroot()
-    
-    root = build_div(root, 'section')
-    root = build_div(root, 'chapter')
-    root = build_div(root, 'book')
-    indent(root)
-    ET.ElementTree(root).write(cible, encoding="utf-8")
+        label_close.pack()
+        bouton_option_len.pack()
+        bouton_stats.pack()
+        bouton_extract_lg_sents.pack()
 
-    label_close.pack()
-    bouton_option_len.pack()
-    bouton_stats.pack()
-    bouton_extract_lg_sents.pack()
+    except:
+        label_close_unvalid.pack()    
 
-
-customtkinter.set_appearance_mode("System")  # Modes: system (default), light, dark
-customtkinter.set_default_color_theme("blue")  # Themes: blue (default), dark-blue, green
-
-fenetre = customtkinter.CTk()
+fenetre = Tk()
 
 fenetre.title("Text to XML")
-fenetre.geometry("1080x480")
-fenetre.minsize(480, 360)
+fenetre.geometry("1080x520")
+fenetre.minsize(1080, 520)
+fenetre.config(bg="white")
 
-label_title = customtkinter.CTkLabel(master=fenetre, text="Convert your .txt file into .xml")
+label_title = Label(fenetre, text="Convert your .txt file into .xml",
+                    font=("Ubuntu", 24), fg="black", bg="white")
 label_title.pack(side="top")
 
-frame = customtkinter.CTkFrame(master=fenetre)
+frame = Frame(fenetre, bg="white")
 frame.pack(expand=YES)
 
-upload_insert_frame = customtkinter.CTkFrame(master=frame)
+upload_insert_frame = Frame(frame, bg="white",
+                     bd=1, relief=SUNKEN, width=300, height=100)
 upload_insert_frame.pack()
 
 width = 400
 height = 200
 
-label_upload = customtkinter.CTkLabel(master=upload_insert_frame, text="Click on the Upload button to select your .txt file")
+label_upload = Label(upload_insert_frame, text="Click on the Upload button to select your .txt file",
+                   font=("Ubuntu", 18), fg="black", bg="white")
 label_upload.pack()
 
-bouton_upload = customtkinter.CTkButton(master=upload_insert_frame, text="UPLOAD", command=browseFile)
+bouton_upload = Button(upload_insert_frame, text="UPLOAD",
+                       command=browseFile, fg="#4065A4", bg="white")
 bouton_upload.pack()
 
-download_insert_frame = customtkinter.CTkFrame(master=frame)
+download_insert_frame = Frame(frame, bg="white",
+                     bd=1, relief=SUNKEN, width=300, height=100)
 
-label_download = customtkinter.CTkLabel(master=download_insert_frame, 
-                        text="Click on the Download button to process your .txt file.")
-label_download2 = customtkinter.CTkLabel(master=download_insert_frame, 
-                        text="By default, sentences will be segmented by full stop;\n alternatively, you can define strong punctuation marks for sentence segmentation\nby clicking on the button below.")
+label_download = Label(download_insert_frame, 
+                        text="Click on the Download button to process your .txt file.",
+                        font=("Ubuntu", 18), fg="black", bg="white")
+label_download2 = Label(download_insert_frame, 
+                        text="By default, sentences will be segmented by full stop;\n alternatively, you can define strong punctuation marks for sentence segmentation\nby clicking on the button below.",
+                        font=("Ubuntu", 12), fg="black", bg="white")
 
-bouton_option_punct = customtkinter.CTkButton(master=download_insert_frame, text="Define punctuation settings", command=onClick_punct)
+bouton_option_punct = Button(download_insert_frame, text="Define punctuation settings", command=onClick_punct)
 
-bouton_download = customtkinter.CTkButton(master=download_insert_frame, text="DOWNLOAD", command=saveFile)
+bouton_download = Button(download_insert_frame, text="DOWNLOAD",
+                        command=saveFile, fg="#4065A4", bg="white")
 
-label_close = customtkinter.CTkLabel(master=download_insert_frame,
-                    text="The conversion is complete.\nYou can close the window or convert another file.\nYou can extract stats on sentence length that will appear in the command line and/or download a text file\ncontaining information on the length of individual sentences, with sentences considered too long indicated.\nBy default, a sentence above 80 tokens is considered too long,\nbut you can change the number of tokens by clicking on the button below.")
+label_close = Label(download_insert_frame,
+                    text="The conversion is complete.\nYou can close the window or convert another file.\nYou can extract stats on sentence length that will appear in the command line and/or download a text file\ncontaining information on the length of individual sentences, with sentences considered too long indicated.\nBy default, a sentence above 80 tokens is considered too long,\nbut you can change the number of tokens by clicking on the button below.",                       
+                    font=("Ubuntu", 12), fg="black", bg="white")
 
-bouton_option_len = customtkinter.CTkButton(master=download_insert_frame, text='Define "too-long" sentence', command=len_settings)
+label_close_unvalid = Label(download_insert_frame,
+                    text="The input file may contain structuration errors.\nAn invalid XML file has been generated.\nYou can modify the input file or correct the output file.",                       
+                    font=("Ubuntu", 12), fg="black", bg="white")
 
-bouton_stats = customtkinter.CTkButton(master=download_insert_frame, text="EXTRACT STATS", command=extract_stats)
+bouton_option_len = Button(download_insert_frame, text='Define "too-long" sentence', command=len_settings)
 
-bouton_extract_lg_sents = customtkinter.CTkButton(master=download_insert_frame, text="DOWNLOAD TEXT FILE WITH SENTENCES LENGTH", command=extract_lg_sents)
+bouton_stats = Button(download_insert_frame, text="EXTRACT STATS",
+                        command=extract_stats, fg="#4065A4", bg="white")
 
-label_txt_file_downloaded = customtkinter.CTkLabel(master=download_insert_frame, text="Text file downloaded")
+bouton_extract_lg_sents = Button(download_insert_frame, text="DOWNLOAD TEXT FILE WITH SENTENCES LENGTH",
+                        command=extract_lg_sents, fg="#4065A4", bg="white")
+
+label_txt_file_downloaded = Label(download_insert_frame, text="Text file downloaded",
+                   font=("Ubuntu", 12), fg="black", bg="white")
 
 fenetre.mainloop()

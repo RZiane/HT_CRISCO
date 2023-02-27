@@ -14,7 +14,7 @@ path_CorrTable = "/home/ziane212/crisco_work_ressources/MICLE_CorrTable_13-02-23
 
 # gestion des conversions Upenn particulières, éditions des listes de lemmes et definition d'une fonction qui regroupe toutes les conditions
 
-list_Q = ['ASSEZ', 
+l_Q = ['ASSEZ', 
           'AUCUN', 
           'AUTANT', 
           'AUTRETANT', 
@@ -33,47 +33,53 @@ list_Q = ['ASSEZ',
           'TRESOTOUT', 
           'TROP']
 
-list_QR = ['MOINS', 'PLUS']
+l_QR = ['MOINS', 'PLUS']
 
-list_WH = ['COMME', 'COMMENT', 'POURQUOI', 'QUAND']
+l_WH = ['COMME', 'COMMENT', 'POURQUOI', 'QUAND']
 
-list_ADJR = ['MEILLEUR', 'MEILLEURE', 'MOINDRE', 'PIRE']
+l_ADJR = ['MEILLEUR', 'MEILLEURE', 'MOINDRE', 'PIRE']
 
-list_ADJZ = ['MIEN', 'TIEN', 'SIEN', 'NOTRE', 'VOTRE', 'LEUR']
+l_ADJZ = ['MIEN', 'TIEN', 'SIEN', 'NOTRE', 'VOTRE', 'LEUR']
 
-list_ADJQ = ['MAINT', 'NUL', 'NESUN', 'TOUT', 'TRESOTOUT']
+l_ADJQ = ['MAINT', 'NUL', 'NESUN', 'TOUT', 'TRESOTOUT']
 
-list_ADVQ = ['AUTANT', 'AUTRETANT', 'BEAUCOUP', 'TANT', 'TOUT', 'TRESOTOUT', 'TROP']
+l_ADVQ = ['AUTANT', 'AUTRETANT', 'BEAUCOUP', 'TANT', 'TOUT', 'TRESOTOUT', 'TROP']
 
-list_ADVR = ['MIEUX', 'PIRE']
+l_ADVR = ['MIEUX', 'PIRE']
 
-list_DETQ = ['CHACUN', 'MAINT', 'MOULT', 'NUL', 'PLUSIEURS', 'TOUT']
+l_DETQ = ['CHACUN', 'MAINT', 'MOULT', 'NUL', 'PLUSIEURS', 'TOUT']
 
-list_PRONQ = ['CHACUN', 'NUL', 'NESUN' , 'PEU', 'PLUSIEURS', 'RIEN', 'TOUT']
+l_PRONQ = ['CHACUN', 'NUL', 'NESUN' , 'PEU', 'PLUSIEURS', 'RIEN', 'TOUT']
 
-list_MD = ['VOULOIR', 'DEVOIR', 'POUVOIR', 'SOULOIR', 'SAVOIR']
+l_MD = ['VOULOIR', 'DEVOIR', 'POUVOIR', 'SOULOIR', 'SAVOIR']
 
-def ConvSpecUPenn(LEMMA):
+l_lemma_spec = [l_ADJQ, l_ADJR, l_ADJZ, l_ADVQ, l_ADVR, l_DETQ, l_PRONQ, l_QR, l_WH]
+
+def ConvSpecUPenn(LEMMA, s_udpos, w):
     
-    global list_upennpos
-    
-    if LEMMA in list_Q:
-        list_upennpos = 'Q'
-    else:
-        pass
-    '''
-    if LEMMA in list_QR:
-        list_upennpos = 'QR'
-        
-    if LEMMA in list_WH:
-        list_upennpos = 'WADV'
-        
-    if LEMMA in list_ADJR and i[3]=="ADJ":
-        list_upennpos = 'ADJR'
+    global upennpos
+
+    if LEMMA in l_ADJQ and s_udpos == 'ADJ':
+        w.attrib['uppos'] = 'ADJQ'
+    if LEMMA in l_ADJR and s_udpos == 'ADJ':
+        w.attrib['uppos'] = 'ADJR'
+    if LEMMA in l_ADJZ and s_udpos == 'ADJ':
+        w.attrib['uppos'] = 'ADJZ'
+    if LEMMA in l_ADVQ and s_udpos == 'ADV':
+        w.attrib['uppos'] = 'ADVQ'
+    if LEMMA in l_ADVR and s_udpos == 'ADV':
+        w.attrib['uppos'] = 'ADJV'
+    if LEMMA in l_DETQ and s_udpos == 'DET':
+        w.attrib['uppos'] = 'DETQ'
+    if LEMMA in l_PRONQ and s_udpos == 'PRON':
+        w.attrib['uppos'] = 'PRONQ'
+    if LEMMA in l_QR:
+        w.attrib['uppos'] = 'QR'
+    if LEMMA in l_WH:
+        w.attrib['uppos'] = 'WH'
         
     if LEMMA.endswith('ISME') and i[3]=="ADJ":
         list_upennpos = 'ADJS'
-    '''
     
 
 def ConvSpecUPenn_VERB(LEMMA, XFEATS_PRESTO):
@@ -101,7 +107,7 @@ def ConvSpecUPenn_VERB(LEMMA, XFEATS_PRESTO):
             XPOS_UPenn = 'APP'
     
     elif LEMMA != 'AVOIR' and LEMMA != 'ÊTRE':
-        if LEMMA in list_MD:
+        if LEMMA in l_MD:
             if XFEATS_PRESTO == 'Ga':
                 XPOS_UPenn = 'MDG'
             elif XFEATS_PRESTO == 'Ge':
@@ -239,8 +245,6 @@ def process_conversion(inputfile, outputfile):
             else:
                 w.attrib['NoMatchingPresto'] = 'Word'
 
-        ConvSpecUPenn(s_lemma)
-
         if list_prpos != [] and list_prfeat != [] and list_upennpos != []:
             if len(list_prpos) > 1:
                 XPOS_PRESTO = '///'.join(list_prpos)
@@ -256,7 +260,7 @@ def process_conversion(inputfile, outputfile):
                 XPOS_UPENN = '///'.join(list_upennpos)
             else:
                 XPOS_UPENN = list_upennpos[0]
-
+            
             # Gestion de l'absence de conversion de l'étiquette UPenn
             try:
                 w.attrib['uppos'] = XPOS_UPENN
@@ -322,11 +326,14 @@ def process_conversion(inputfile, outputfile):
 
         if s_udpos == 'PUNCT':
             w.attrib['lemma'] = w.text
+        
+        for l in l_lemma_spec:
+            if s_lemma in l:
+                ConvSpecUPenn(s_lemma, s_udpos, w)
                 
     indent_xml(root)
 
     ET.ElementTree(root).write(outputfile, encoding="utf-8")
-
 
 
 if __name__ == "__main__":
@@ -335,4 +342,4 @@ if __name__ == "__main__":
    print("Processing dictionnary...")
    d_PRESTO = make_d_PRESTO(path_PRESTO)
    print("Processing file...")
-   process_conversion(inputfile, outputfile)
+   process_conversion(inputfile, outputfile)D
