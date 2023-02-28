@@ -367,13 +367,13 @@ def conversion_conllu2xml(inputfile, outputfile):
             if 'sent_id' in line:
                 if len(sentence.keys()) != 0:
                     sentence = {}
-                '''
+                
                 sentence_str = re.search("\d+-\d+-\d+-\d+-\d+", line).group()
                 num2 = sentence_str.split('-')
                 '''
                 sentence_str = re.search("\d+_\d+_\d+_\d+_\d+", line).group()
                 num2 = sentence_str.split('_')
-
+                '''
                 sentence['book'] = num2[0]
                 sentence['chapter'] = num2[1]
                 sentence['section'] = num2[2]
@@ -576,6 +576,192 @@ def conversion_conllu2xml(inputfile, outputfile):
 
     ET.ElementTree(data).write(outputfile, encoding="utf-8")
 
+def synchronisation_xml(functionw, xmlw, compil):
+    
+    """
+    Fonction permettant de comparer deux fichiers XML-TEI ayant la même numérotation des éléments structurant
+    book/chapter/section/p/s/w et de reporter les attributs des éléments w du fichier cible vers les éléments
+    w dans l'autre fichier, et de produire un nouvel xml.
+    
+    """
+
+    #import xml.etree.ElementTree as ET
+    from lxml import etree as ET
+    
+    coord={}
+    #coord2={}
+    #roots=[]
+    
+       
+    # On importe le XML-TEI d'entrée avec les fonctions et on le lit.
+    tree = ET.parse(open(functionw, encoding="utf-8"))
+    root = tree.getroot()
+
+#On cible les books, et on récupère l'attribut n
+
+    for book in root.findall('.//div[@type="book"]'):
+        book_nb = book.get('n')
+
+    # On cible les chapter, et on récupère l'attribut n
+
+        for chapter in book.findall('.//div[@type="chapter"]'):
+            chapter_nb = chapter.get('n')
+
+            # On cible les sections, et on récupère l'attribut n
+
+            for section in chapter.findall('.//div[@type="section"]'):
+                section_nb = section.get('n')
+
+
+                #On cible les paragraphes, et on récupère l'attribut n
+
+                for para in section.findall('.//p'):
+                    para_nb = para.get('n')
+
+                        #On cible les sentences, et on récupère l'attribut n
+
+                    for sentence in para.findall('.//s'):
+                        sentence_nb = sentence.get('n')
+
+                            # On boucle sur les w
+
+                        for word in sentence.findall('.//w'):
+                            word_nb = word.get('n')
+
+                                 # On nomme les coordonnées de la phrase
+
+                            address = book_nb+"-"+chapter_nb+"-"+section_nb+"-"+para_nb+"-"+sentence_nb+"-"+word_nb
+                            #address2 = book_nb+"-"+chapter_nb+"-"+section_nb+"-"+para_nb+"-"+sentence_nb+"-"+word_nb
+
+                            # On cherche les attributs voulus, et on remplit les dictionnaires
+
+                            coord[address] = word.attrib
+                            #coord2[address2] = word.text
+                            #roots.append(address)
+
+
+   #XML sans fonction
+                    
+
+       
+    # On importe le XML-TEI d'entrée et on le lit.
+    tree2 = ET.parse(open(xmlw, encoding="utf-8"))
+    root = tree2.getroot()
+
+# On cible les book, et on récupère l'attribut n
+
+    for book in root.findall('.//div[@type="book"]'):
+        book_nb = book.get('n')
+
+# On cible les chapter, et on récupère l'attribut n
+
+        for chapter in book.findall('.//div[@type="chapter"]'):
+            chapter_nb = chapter.get('n')
+
+            # On cible les sections, et on récupère l'attribut n
+
+            for section in chapter.findall('.//div[@type="section"]'):
+                section_nb = section.get('n')
+
+                #On cible les paragraphes, et on récupère l'attribut n
+
+                for para in section.findall('.//p'):
+                    para_nb = para.get('n')
+
+                        #On cible les sentences, et on récupère l'attribut n
+
+                    for sentence in para.findall('.//s'):
+                        sentence_nb = sentence.get('n')
+
+                            # On boucle sur les w
+
+                        for word in sentence.findall('.//w'):
+                            word_nb = word.get('n')
+                                # On nomme les coordonnées de la phrase
+
+                            address = book_nb+"-"+chapter_nb+"-"+section_nb+"-"+para_nb+"-"+sentence_nb+"-"+word_nb
+                            #address2 = book_nb+"-"+chapter_nb+"-"+section_nb+"-"+para_nb+"-"+sentence_nb+"-"+word_nb
+
+                            #coord[address]['lemma_src'] = word.get('lemma_src')
+
+                            word.set('udpos', coord[address]['udpos'])
+                            
+                            #coord[address]['lemma'] = word.get('lemma')
+                            word.set('lemma', coord[address]['lemma'])
+
+                            word.set('head', coord[address]['head'])
+
+                            word.set('function', coord[address]['function'])
+
+                            if word.get('join'):
+                                coord[address]['join'] = word.get('join')
+                            else:
+                                coord[address]['join'] = '_'
+
+                            word.attrib['n'] = word.attrib.pop('n')
+                            word.attrib['udpos'] = word.attrib.pop('udpos')
+                            #word.attrib['lemma'] = word.attrib.pop('lemma')
+                            word.attrib['head'] = word.attrib.pop('head')
+                            word.attrib['function'] = word.attrib.pop('function')
+                            #word.attrib['lemma_src'] = word.attrib.pop('lemma_src')
+                            #word.attrib['join'] = word.attrib.pop('join')
+                            #word.attrib['prpos'] = word.attrib.pop('prpos')
+                            #word.attrib['uppos'] = word.attrib.pop('uppos')
+                            #word.attrib['retagging'] = word.attrib.pop('retagging')
+                            #dev print(word.attrib)
+
+                            '''
+                            if address in coord.keys():
+                                if word.get('join'):
+                                    coord[address]['join'] = word.get('join')
+                                else:
+                                    coord[address]['join'] = '_'
+
+                                if word.get('incoherence'):
+                                    coord[address]['incoherence'] = word.get('incoherence')
+                                else:
+                                    coord[address]['incoherence'] = '_'
+
+                                if word.get('NoMatchingPresto'):
+                                    coord[address]['NoMatchingPresto'] = word.get('NoMatchingPresto')
+                                else:
+                                    coord[address]['NoMatchingPresto'] = '_'
+
+                                if word.get('NoConvUPenn'):
+                                    coord[address]['NoConvUPenn'] = word.get('NoConvUPenn')
+                                else:
+                                    coord[address]['NoConvUPenn'] = '_'
+                            '''
+
+
+                            '''
+                            if word.get('udpos'):
+                                coord[address]['udpos'] = word.get('udpos')
+                            else:
+                                coord[address]['udpos'] = '_'
+
+                            if word.get('head'):
+                                coord[address]['head'] = word.get('head')
+                            else:
+                                coord[address]['head'] = '_'
+
+                            if word.get('function'):
+                                coord[address]['function'] = word.get('function')
+                            else:
+                                coord[address]['function'] = '_'
+
+                            '''    
+                            #word.attrib = coord[address]
+
+                            #if address2 in coord2.keys():
+                                #word.text = coord2[address2]
+
+    # On écrit le TEI obtenu dans le fichier spécifié en second paramètre.
+    
+    #tree2.write(compil, xml_declaration=False, encoding="utf-8")
+    
+    #ET.dump(tree)
+    tree2.write(compil, pretty_print=True, encoding="utf-8")
 
 ### Lemmatisation/Conversion tagsets ##########################
 def make_d_PRESTO(path_PRESTO):
