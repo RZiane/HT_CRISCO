@@ -12,23 +12,72 @@ def parsefile(input_path, output_path, model_path):
         )
     
 def parse():
-    input_conllu_tempfile = input_path.rstrip('.xml')+'_input_temp.conllu'
-    output_conllu_tempfile = input_path.rstrip('.xml')+'_output_temp.conllu'
-    output_xml_tempfile = input_path.rstrip('.xml')+'_temp.conllu'
-    conversion_xml2conllu(input_path, input_conllu_tempfile)
+    try:
+        temp_path
+    except NameError:
+        temp_path = []
 
-    print('Parsing...')
-    parsefile(input_conllu_tempfile, output_conllu_tempfile, model_path)
-    print('Parsing done')
-    conversion_conllu2xml(output_conllu_tempfile, output_xml_tempfile)
+    if temp_path != []:
 
-    synchronisation_xml(output_xml_tempfile, input_path, output_path)
-    print('Conversion done')
-    '''
-    os.remove(input_conllu_tempfile)
-    os.remove(output_conllu_tempfile)
-    os.remove(output_xml_tempfile)
-   ''' 
+        path = os.path.join(temp_path, 'temp_folder')
+        try:
+            os.makedirs(path)
+        except:
+            pass
+
+        filename = input_path.split('/')[len(input_path.split('/'))-1].split('.')[0]
+
+        input_conllu_tempfile = path+filename+'_input_temp.conllu'
+        output_conllu_tempfile =  path+filename+'_output_temp.conllu'
+        output_xml_tempfile =  path+filename+'_temp.xml'
+
+        conversion_xml2conllu(input_path, input_conllu_tempfile)
+
+        print('Parsing...')
+        parsefile(input_conllu_tempfile, output_conllu_tempfile, model_path)
+        print('Parsing done')
+        conversion_conllu2xml(output_conllu_tempfile, output_xml_tempfile)
+
+        synchronisation_xml(output_xml_tempfile, input_path, output_path)
+        print('Conversion done')
+
+    else:
+        input_conllu_tempfile = input_path.rstrip('.xml')+'_input_temp.conllu'
+        output_conllu_tempfile = input_path.rstrip('.xml')+'_output_temp.conllu'
+        output_xml_tempfile = input_path.rstrip('.xml')+'_temp.conllu'
+        conversion_xml2conllu(input_path, input_conllu_tempfile)
+
+        print('Parsing...')
+        parsefile(input_conllu_tempfile, output_conllu_tempfile, model_path)
+        print('Parsing done')
+        conversion_conllu2xml(output_conllu_tempfile, output_xml_tempfile)
+
+        synchronisation_xml(output_xml_tempfile, input_path, output_path)
+        print('Conversion done')
+        
+        os.remove(input_conllu_tempfile)
+        os.remove(output_conllu_tempfile)
+        os.remove(output_xml_tempfile)
+        
+
+def open_parsing():
+    global fenetre_options_parsing
+    fenetre_options_parsing = Toplevel()
+    fenetre_options_parsing.title("Parsing settings")
+    fenetre_options_parsing.geometry("240x120")
+    fenetre_options_parsing.minsize(240, 120)
+    fenetre_options_parsing.config(bg="white")
+
+    bouton_path_temp = Button(fenetre_options_parsing, text="SELECT TEMP FILE FOLDER PATH",
+                       command=browseTempFile, fg="#4065A4", bg="white")
+    bouton_path_temp.pack()
+
+    bouton_parse = Button(fenetre_options_parsing, text="PARSE",
+                       command=parse, fg="#4065A4", bg="white")
+    
+    bouton_parse.pack()
+
+
 def make_path(source):
     global source_path
     source_path = str(source)
@@ -37,6 +86,29 @@ def make_path(source):
     dir_file = '/'.join(source.split('/')[:len(source.split('/'))-1])+'/'
 
     return source_path
+
+def browseTempFile():
+    global label_upload_temp
+    try:
+        label_upload_temp.destroy()
+    except:
+        pass
+
+    source = filedialog.askdirectory(initialdir=dir_file)
+
+    source_path = make_path(source)
+
+    if source_path != '':
+        var_msg = "This temporary files folder is selected:\n"+source_path+""
+        
+        label_upload_temp = Label(frame,
+                            text=var_msg,                       
+                            font=("Ubuntu", 10), fg="black", bg="white")
+
+        label_upload_temp.pack()
+    
+    global temp_path
+    temp_path = source_path
 
 def browseFile_input():
     global label_upload_input
@@ -47,10 +119,7 @@ def browseFile_input():
 
     source = filedialog.askopenfilename(initialdir="/",
                                         title="Select a File",
-                                        filetypes=(("all files",
-                                                    "*.*"),
-                                                   ("Text files",
-                                                    "*.xml*")))
+                                        filetypes=[("eXtensible Markup Language","*.xml*")])
     source_path = make_path(source)
 
     if source_path != '':
@@ -74,10 +143,7 @@ def browseFile_output():
 
     cible = filedialog.asksaveasfilename(initialdir=dir_file,
                                          title="Select a File",
-                                         filetypes=(("eXtensible Markup Language",
-                                                     "*.xml*"),
-                                                    ("all files",
-                                                     "*.*")))
+                                         filetypes=[("eXtensible Markup Language","*.xml*")])
                                                      
     cible = cible.rstrip('.xml')+'.xml'
 
@@ -144,8 +210,8 @@ bouton_upload_modelpath = Button(frame, text="UPLOAD MODEL PATH",
                        command=browseFile_model, fg="#4065A4", bg="white")
 bouton_upload_modelpath.pack()
 
-bouton_parse = Button(frame, text="PARSE",
-                       command=parse, fg="#4065A4", bg="white")
-bouton_parse.pack()
+bouton_open_parse = Button(frame, text="PARSE",
+                       command=open_parsing, fg="#4065A4", bg="white")
+bouton_open_parse.pack()
 
 fenetre.mainloop()
