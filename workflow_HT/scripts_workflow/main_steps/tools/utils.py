@@ -336,8 +336,7 @@ def conversion_xml2conllu(inputfile, outputfile):
                                                 form += child.tail
                                 else:
                                     form = word.text
-                                #dev 
-                                print(form)
+                                #dev print(form)
                                 mot = word_nb+"\t"+form.replace("\t", "").replace("\n", "")+"\t"+lemma+"\t"+udpos+"\t"+uppos+"\t_\t"+head+"\t"+function+"\t_\tjoin="+join+"|prpos="+prpos+"\n"          
 
                                 strmot = str(mot)
