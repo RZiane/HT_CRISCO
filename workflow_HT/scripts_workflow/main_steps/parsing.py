@@ -1,6 +1,7 @@
 from tkinter import *
 from tkinter import filedialog
 from tkinter import ttk
+import time
 from hopsparser import parser
 import os
 from tools.utils import conversion_xml2conllu, conversion_conllu2xml, synchronisation_xml
@@ -14,7 +15,11 @@ def parsefile(input_path, output_path, model_path):
     
 def parse():
     pb.pack()
-    pb.start()
+    for i in range(5):
+        fenetre_options_parsing.update_idletasks()
+        pb['value'] += 10
+        time.sleep(1)
+
     try:
         if temp_path is not None:
 
@@ -39,7 +44,7 @@ def parse():
 
             synchronisation_xml(output_xml_tempfile, input_path, output_path)
             print('Conversion done')
-
+            pb.destroy()
             print(input_conllu_tempfile)
 
     except NameError:
@@ -55,13 +60,12 @@ def parse():
 
         synchronisation_xml(output_xml_tempfile, input_path, output_path)
         print('Conversion done')
+        pb.destroy()
         
         os.remove(input_conllu_tempfile)
         os.remove(output_conllu_tempfile)
         os.remove(output_xml_tempfile)
-    
-    pb.stop()
-    
+        
     fenetre_options_parsing.destroy()
         
 
