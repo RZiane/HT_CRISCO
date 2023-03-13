@@ -676,6 +676,7 @@ def synchronisation_xml(functionw, xmlw, compil):
                             # On boucle sur les w
 
                         for word in sentence.findall('.//w'):
+                            print(word.text)
                             word_nb = word.get('n')
                                 # On nomme les coordonnées de la phrase
 
@@ -684,12 +685,12 @@ def synchronisation_xml(functionw, xmlw, compil):
 
                             #coord[address]['lemma_src'] = word.get('lemma_src')
 
-                            word.set('udpos', coord[address]['udpos'])
+                            word.set('udpos', word.get('udpos'))
 
-                            word.set('retagging',  word.get('udpos'))
+                            word.set('retagging',  coord[address]['udpos'])
                             
                             #coord[address]['lemma'] = word.get('lemma')
-                            word.set('lemma', coord[address]['lemma'])
+                            word.set('lemma', word.get('lemma'))
 
                             word.set('head', coord[address]['head'])
 
@@ -697,7 +698,7 @@ def synchronisation_xml(functionw, xmlw, compil):
 
                             word.set('prpos',  word.get('prpos'))
 
-                            word.set('uppos', coord[address]['uppos'])
+                            word.set('uppos', word.get('uppos'))
 
                             if word.get('join'):
                                 coord[address]['join'] = word.get('join')
@@ -815,18 +816,20 @@ def resolv_ambi(inputfile, outputfile):
     tree = ET.parse(open(inputfile, encoding="utf-8"))
     root = tree.getroot()
 
-    l_function = ['aux', 'aux:pass', 'cop']
+    l_function_AUX = ['aux', 'aux:pass', 'cop']
+    l_function_VERB = ['root', 'ccomp', 'acl:relcl']
 
     for id_, s in enumerate(root.findall('.//s')):
         
         for w in s.findall('.//w'):
             
-            if w.get('uppos') ==  'VPP///VJ' or w.get('uppos') ==  'EPP///EJ' or w.get('uppos') ==  'APP///AJ' :
+            # classique
+            if (w.get('uppos') ==  'VPP///VJ' or w.get('uppos') ==  'EPP///EJ' or w.get('uppos') ==  'APP///AJ') and w.get('function')in l_function_VERB :
                 id_w = w.get('n')
                 
                 for w2 in root.findall('.//s')[id_]:
                     
-                    if w2.get('head') == id_w and w2.get('udpos') == 'AUX' and w2.get('function') in l_function:
+                    if w2.get('head') == id_w and w2.get('udpos') == 'AUX' and w2.get('function') in l_function_AUX:
                         
                         if w.get('uppos') ==  'VPP///VJ':
                             w.set('uppos', 'VPP')
@@ -840,7 +843,7 @@ def resolv_ambi(inputfile, outputfile):
                             
                         w.set('ambiguite', 'standard')
                     
-                    elif w2.get('head') == id_w and w2.get('function') in l_function:
+                    elif w2.get('head') == id_w and w2.get('function') in l_function_AUX:
                         
                         w.set('ambiguite', 'POS')
                         
@@ -848,26 +851,7 @@ def resolv_ambi(inputfile, outputfile):
                         
                         w.set('ambiguite', 'function')
             
-            if w.get('uppos') ==  'VPP///VJ' and w.get('function') ==  'conj':
-                
-                head_w = w.get('head')
-                id_w = w.get('n')
-
-                for w2 in root.findall('.//s')[id_]:
-                    if w2.get('head') == id_w and (w2.get('function') == 'nsubj' or w2.get('function') == 'expl'):
-                        w.set('uppos', 'VJ')
-                        w.set('prpos', 'Vvc')
-                        w.set('ambiguite', 'subj')
-                
-                    elif w2.get('n') == head_w and w2.get('udpos') == 'VERB' and w2.get('uppos') == 'VPP' :
-                        id_parent = w2.get('n')
-                        
-                        for w3 in root.findall('.//s')[id_]:
-                            if w3.get('head') == id_parent and w3.get('udpos') == 'AUX' and w3.get('function') in l_function:                   
-                                w.set('uppos', 'VPP')
-                                w.set('prpos', 'Ge')
-                                w.set('ambiguite', 'conj')
-            
+            # doubles auxiliaires
             if w.get('uppos') ==  'APP///AJ' or w.get('uppos') ==  'EPP///EJ':
                 
                 head_w = w.get('head')
@@ -914,6 +898,73 @@ def resolv_ambi(inputfile, outputfile):
                                 
                                 if w.get('ambiguite') == None:
                                     w.set('ambiguite', 'spe')
+            
+            # conj
+            if w.get('uppos') ==  'VPP///VJ' and w.get('function') ==  'conj':
+                
+                head_w = w.get('head')
+                id_w = w.get('n')
+
+                for w2 in root.findall('.//s')[id_]:
+                    if w2.get('head') == id_w and (w2.get('function') == 'nsubj' or w2.get('function') == 'expl'):
+                        w.set('uppos', 'VJ')
+                        w.set('prpos', 'Vvc')
+                        w.set('ambiguite', 'subj')
+                
+                    elif w2.get('n') == head_w and w2.get('udpos') == 'VERB' and w2.get('uppos') == 'VPP' :
+                        id_parent = w2.get('n')
+                        
+                        for w3 in root.findall('.//s')[id_]:
+                            if w3.get('head') == id_parent and w3.get('udpos') == 'AUX' and w3.get('function') in l_function_AUX:                   
+                                w.set('uppos', 'VPP')
+                                w.set('prpos', 'Ge')
+                                w.set('ambiguite', 'conj')
+            
+            # xcomp
+            if w.get('uppos') ==  'VPP///VJ' and w.get('function') ==  'xcomp':
+                
+                head_w = w.get('head')
+                id_w = w.get('n')
+
+                b_spot_aux = False
+
+                for w2 in root.findall('.//s')[id_]:
+
+                    if w2.get('head') == id_w and w2.get('udpos') == 'AUX':
+                        b_spot_aux = True
+
+                if b_spot_aux == False:
+                    w.set('uppos', 'VX')
+                    w.set('prpos', 'Vvn')
+                    
+                elif b_spot_aux == True:
+                    w.set('uppos', 'VJ')
+                    w.set('prpos', 'Vvc')
+
+            # acl
+            if w.get('uppos') ==  'VPP///VJ' and w.get('function') ==  'acl':
+                
+                head_w = w.get('head')
+                id_w = w.get('n')
+
+                b_spot_child = False
+
+                for w2 in root.findall('.//s')[id_]:
+
+                    if w2.get('head') == id_w:
+                        b_spot_child = True
+                
+                if b_spot_child == True:
+                    w.set('uppos', 'VPP')
+                    w.set('prpos', 'Ge')
+                
+                else:
+                    w.set('uppos', 'VJ')
+                    w.set('prpos', 'Vvc')
+
+
+
+                        
     
     indent_xml(root)
 

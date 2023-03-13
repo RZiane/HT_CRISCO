@@ -8,6 +8,7 @@ from tools.utils import conversion_xml2conllu, conversion_conllu2xml, synchronis
 
 def parsefile(input_path, output_path, model_path):
     parser.parse(
+            device='cuda',
             in_file=input_path,
             model_path=model_path,
             out_file=output_path
