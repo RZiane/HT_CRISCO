@@ -111,7 +111,7 @@ def renum_xml(inputfile, outputfile):
     import xml.etree.ElementTree as ET
     
     # On importe le XML-TEI d'entrée et on le lit.
-    tree = ET.parse(inputfile)
+    tree = ET.parse(open(inputfile, encoding="utf-8"))
     root = tree.getroot()
     
     # On donne au module XML le namespace de la TEI, sans préfixe car ce sera le seul.
@@ -187,10 +187,10 @@ def renum_xml(inputfile, outputfile):
 
 def conversion_xml2conllu(inputfile, outputfile):
     # On ouvre le fichier de sortie
-    with open(outputfile, 'w', encoding="utf8") as conll:
+    with open(outputfile, 'w', encoding="utf-8") as conll:
 
     # On importe le XML-TEI d'entrée et on le lit.
-        tree = ET.parse(inputfile)
+        tree = ET.parse(open(inputfile, encoding="utf-8"))
         root = tree.getroot()
 
         # On donne au module XML le namespace de la TEI, sans préfixe car ce sera le seul.
@@ -336,8 +336,7 @@ def conversion_xml2conllu(inputfile, outputfile):
                                                 form += child.tail
                                 else:
                                     form = word.text
-                                #dev 
-                                print(form)
+                                #dev print(form)
                                 mot = word_nb+"\t"+form.replace("\t", "").replace("\n", "")+"\t"+lemma+"\t"+udpos+"\t"+uppos+"\t_\t"+head+"\t"+function+"\t_\tjoin="+join+"|prpos="+prpos+"\n"          
 
                                 strmot = str(mot)
@@ -686,6 +685,8 @@ def synchronisation_xml(functionw, xmlw, compil):
                             #coord[address]['lemma_src'] = word.get('lemma_src')
 
                             word.set('udpos', coord[address]['udpos'])
+
+                            word.set('retagging',  word.get('udpos'))
                             
                             #coord[address]['lemma'] = word.get('lemma')
                             word.set('lemma', coord[address]['lemma'])
@@ -694,21 +695,30 @@ def synchronisation_xml(functionw, xmlw, compil):
 
                             word.set('function', coord[address]['function'])
 
+                            word.set('prpos',  word.get('prpos'))
+
+                            word.set('uppos', coord[address]['uppos'])
+
                             if word.get('join'):
                                 coord[address]['join'] = word.get('join')
                             else:
                                 coord[address]['join'] = '_'
 
+                            word.set('join', coord[address]['join'])
+
                             word.attrib['n'] = word.attrib.pop('n')
-                            word.attrib['udpos'] = word.attrib.pop('udpos')
-                            #word.attrib['lemma'] = word.attrib.pop('lemma')
                             word.attrib['head'] = word.attrib.pop('head')
                             word.attrib['function'] = word.attrib.pop('function')
+                            word.attrib['udpos'] = word.attrib.pop('udpos')
+                            word.attrib['prpos'] = word.attrib.pop('prpos')
+                            word.attrib['uppos'] = word.attrib.pop('uppos')
+                            word.attrib['retagging'] = word.attrib.pop('retagging')
+                            word.attrib['lemma'] = word.attrib.pop('lemma')
+                            
+                            
                             #word.attrib['lemma_src'] = word.attrib.pop('lemma_src')
-                            #word.attrib['join'] = word.attrib.pop('join')
-                            #word.attrib['prpos'] = word.attrib.pop('prpos')
-                            #word.attrib['uppos'] = word.attrib.pop('uppos')
-                            #word.attrib['retagging'] = word.attrib.pop('retagging')
+                            word.attrib['join'] = word.attrib.pop('join')
+                            
                             #dev print(word.attrib)
 
                             '''
@@ -799,6 +809,115 @@ def make_d_CorrTable(path_CorrTable):
     CorrTable.close()
 
     return d_CorrTable
+
+def resolv_ambi(inputfile, outputfile):
+
+    tree = ET.parse(open(inputfile, encoding="utf-8"))
+    root = tree.getroot()
+
+    l_function = ['aux', 'aux:pass', 'cop']
+
+    for id_, s in enumerate(root.findall('.//s')):
+        
+        for w in s.findall('.//w'):
+            
+            if w.get('uppos') ==  'VPP///VJ' or w.get('uppos') ==  'EPP///EJ' or w.get('uppos') ==  'APP///AJ' :
+                id_w = w.get('n')
+                
+                for w2 in root.findall('.//s')[id_]:
+                    
+                    if w2.get('head') == id_w and w2.get('udpos') == 'AUX' and w2.get('function') in l_function:
+                        
+                        if w.get('uppos') ==  'VPP///VJ':
+                            w.set('uppos', 'VPP')
+                            w.set('prpos', 'Ge')
+                        elif w.get('uppos') ==  'APP///AJ':
+                            w.set('uppos', 'APP')
+                            w.set('prpos', 'Ge')
+                        elif w.get('uppos') ==  'EPP///EJ':
+                            w.set('uppos', 'EPP')
+                            w.set('prpos', 'Ge')
+                            
+                        w.set('ambiguite', 'standard')
+                    
+                    elif w2.get('head') == id_w and w2.get('function') in l_function:
+                        
+                        w.set('ambiguite', 'POS')
+                        
+                    elif w2.get('head') == id_w and w2.get('udpos') == 'AUX':
+                        
+                        w.set('ambiguite', 'function')
+            
+            if w.get('uppos') ==  'VPP///VJ' and w.get('function') ==  'conj':
+                
+                head_w = w.get('head')
+                id_w = w.get('n')
+
+                for w2 in root.findall('.//s')[id_]:
+                    if w2.get('head') == id_w and (w2.get('function') == 'nsubj' or w2.get('function') == 'expl'):
+                        w.set('uppos', 'VJ')
+                        w.set('prpos', 'Vvc')
+                        w.set('ambiguite', 'subj')
+                
+                    elif w2.get('n') == head_w and w2.get('udpos') == 'VERB' and w2.get('uppos') == 'VPP' :
+                        id_parent = w2.get('n')
+                        
+                        for w3 in root.findall('.//s')[id_]:
+                            if w3.get('head') == id_parent and w3.get('udpos') == 'AUX' and w3.get('function') in l_function:                   
+                                w.set('uppos', 'VPP')
+                                w.set('prpos', 'Ge')
+                                w.set('ambiguite', 'conj')
+            
+            if w.get('uppos') ==  'APP///AJ' or w.get('uppos') ==  'EPP///EJ':
+                
+                head_w = w.get('head')
+                function_w = w.get('function')
+                
+                for w2 in root.findall('.//s')[id_]:
+                    if w2.get('n') == head_w:
+                        id_parent = w2.get('n')
+                        udpos_parent = w2.get('udpos')
+                        uppos_parent = w2.get('uppos')
+                        
+                        var = False
+                        
+                        for w3 in root.findall('.//s')[id_]:
+                            if w3.get('head') == id_parent and w3.get('udpos') == 'AUX':
+                                
+                                var = True
+                                
+                            if var == True:
+                                
+                                if w.get('uppos') ==  'APP///AJ':
+                                    w.set('uppos', 'APP')
+                                    w.set('prpos', 'Ge')
+                                elif w.get('uppos') ==  'EPP///EJ':
+                                    w.set('uppos', 'EPP')
+                                    w.set('prpos', 'Ge')
+                                
+                                if udpos_parent == 'NOUN' or udpos_parent == 'ADJ':
+                                    if function_w == 'cop':
+                                        w.set('ambiguite', 'copule')
+                                    else:
+                                        w2.set('fiabilite', 'fonction')
+                                
+                                elif udpos_parent == 'VERB':
+                                    if function_w == 'aux' or function_w == 'aux:pass' :
+                                        w.set('ambiguite', 'auxiliaire')
+                                    else:
+                                        w2.set('fiabilite', 'fonction')
+                                        
+                                    if uppos_parent == 'VJ':
+                                        w2.set('uppos', 'VPP')
+                                        w2.set('prpos', 'Ge')
+                                        w2.set('ambiguite', 'standard')
+                                
+                                if w.get('ambiguite') == None:
+                                    w.set('ambiguite', 'spe')
+    
+    indent_xml(root)
+
+    ET.ElementTree(root).write(outputfile, encoding="utf-8")
 
 
 ### Segmentation ##############################################

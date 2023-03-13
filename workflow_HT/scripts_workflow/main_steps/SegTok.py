@@ -6,6 +6,7 @@ import os
 import statistics
 from tools.utils import indent_xml
 from tools.utils import build_div
+from tools.utils import renum_xml
 
 #os.system('Xvfb :1 -screen 0 1600x1200x16  &')    # create virtual display with size 1600x1200 and 16 bit color. Color can be changed to 24 or 8
 os.environ['DISPLAY']=':1.0'    # tell X clients to use our virtual DISPLAY :1.0
@@ -14,12 +15,20 @@ def onClick_punct():
     CheckVar1, CheckVar2 = punct_settings()
 
 def select_all_boxes():
-    CheckVar1.set(1)
-    CheckVar2.set(1)
-    CheckVar3.set(1)
-    CheckVar4.set(1)
-    CheckVar5.set(1)
-    CheckVar6.set(1)
+    if CheckVar7.get()==1:
+        CheckVar1.set(1)
+        CheckVar2.set(1)
+        CheckVar3.set(1)
+        CheckVar4.set(1)
+        CheckVar5.set(1)
+        CheckVar6.set(1)
+    elif CheckVar7.get()==0:
+        CheckVar1.set(0)
+        CheckVar2.set(0)
+        CheckVar3.set(0)
+        CheckVar4.set(0)
+        CheckVar5.set(0)
+        CheckVar6.set(0)
 
 def reset_select_all_boxes():
     CheckVar7.set(0)
@@ -247,10 +256,7 @@ def extract_lg_sents():
     global cible_txt
     cible_txt = filedialog.asksaveasfilename(initialdir=dir_file,
                                          title="Select a File",
-                                         filetypes=(("Text files",
-                                                     "*.txt*"),
-                                                    ("all files",
-                                                     "*.*")))
+                                         filetypes=[("Text files","*.txt*")])
     
     cible_txt = cible_txt.rstrip('.txt')+'.txt'
     
@@ -269,28 +275,31 @@ def upload_path():
 
 def browseFile():
     global source
+    global label_upload
+    try:
+        label_upload.destroy()
+    except:
+        pass
+
     source = filedialog.askopenfilename(initialdir="/",
                                         title="Select a File",
-                                        filetypes=(("all files",
-                                                    "*.*"),
-                                                   ("Text files",
-                                                    "*.txt*")))
+                                        filetypes=[("Text files","*.txt*")])
     
     source_path = upload_path()
+    if source_path != '':
+        var_msg = "This file is uploaded:\n"+source_path+""
 
-    var_msg = "This file is uploaded:\n"+source_path+""
+        label_upload = Label(frame,
+                            text=var_msg,                       
+                            font=("Ubuntu", 10), fg="black", bg="white")
 
-    label_upload = Label(frame,
-                        text=var_msg,                       
-                        font=("Ubuntu", 10), fg="black", bg="white")
+        label_upload.pack()
 
-    label_upload.pack()
-
-    download_insert_frame.pack()
-    label_download.pack()
-    label_download2.pack()
-    bouton_option_punct.pack()
-    bouton_download.pack()
+        download_insert_frame.pack()
+        label_download.pack()
+        label_download2.pack()
+        bouton_option_punct.pack()
+        bouton_download.pack()
     
 def saveFile():
     global dir_file
@@ -299,10 +308,11 @@ def saveFile():
     global cible
     cible = filedialog.asksaveasfilename(initialdir=dir_file,
                                          title="Select a File",
-                                         filetypes=(("eXtensible Markup Language",
-                                                     "*.xml*"),
-                                                    ("all files",
-                                                     "*.*")))
+                                         filetypes=(("all files",
+                                                     "*.*"),
+                                                     ("eXtensible Markup Language",
+                                                     "*.xml*")
+                                                    ))
                                                      
     cible = cible.rstrip('.xml')+'.xml'
     
@@ -358,6 +368,8 @@ def saveFile():
             sub = x[0].replace(' ', '%')
             i = i.replace(x[0], sub)
 
+        i = re.sub('  ', ' ', i)
+        i = re.sub('\.\.\.', '…', i)
         i = re.sub(':', ' :', i)
         i = re.sub('\?', ' ?', i)
         i = re.sub('\!', ' !', i)
@@ -371,7 +383,7 @@ def saveFile():
     list_tokenisation = ['l', 'd', 'n', 'i', 's'] # lettre q et qu à intégrer ?
     list_substitution = [('v','u'), ('u','v'), ('i','j'), ('j', 'i')]
     list_spec_char = ['ſ']
-    list_punct = [';', ',', '.', ':', '!', '?', '.»', '. ', '! ', '? ', '.++']
+    list_punct = [';', ',', '.', ':', '!', '?', '.»', '. ', '! ', '? ', '.++', '…']
 
     '''
     # recupération des métadonnées sur le fichier et ajout dans la liste de travail
@@ -469,9 +481,9 @@ def saveFile():
                             if token.startswith(punct_token[0][1]):
                                 pass
 
-                            elif re.match('([a-z]{1,2}\.)[;,:]?', punct_token[0][0]):
+                            elif re.match('([a-z]{1,2}\.)[;,:…]?', punct_token[0][0]):
 
-                                if token.endswith(tuple([";",",",":"])):
+                                if token.endswith(tuple([";",",",":",'…'])):
                                     if punct_token != []: 
                                         ntoken = token.rstrip(punct_token[0][1])
                                         sent[id_token] = ntoken
@@ -652,7 +664,7 @@ def saveFile():
         
         ET.ElementTree(root).write(cible, encoding="utf-8")
         
-        renum(cible, cible)
+        renum_xml(cible, cible)
 
         label_close.pack()
         bouton_option_len.pack()
@@ -660,7 +672,8 @@ def saveFile():
         bouton_extract_lg_sents.pack()
         print(cible)
 
-    except:
+    except Exception as e:
+        print(e)
         label_close_unvalid.pack()    
 
 fenetre = Tk()
