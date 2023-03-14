@@ -29,17 +29,26 @@ def lemmatisation(entry, tag, list_prpos, list_prfeat, list_lemma):
                 list_lemma.append(entry[3].lower())
 
 def process_lemmatisation(inputfile, outputfile):
-    list_inco = []
-    nb_sent = 0
-    cnt = 0
     tree = ET.parse(open(inputfile, encoding='utf-8'))
     root = tree.getroot()
-    progress = len(list(root.findall('.//w')))
 
     for w in tqdm(root.findall('.//w')):
 
         # lecture des tokens
         s_token = w.text
+        if len(list(w))!=0:
+            if list(w)[0].tag == 'choice':
+                s_token = list(w)[0][1].text
+
+            else:
+
+                for child in w.iter():
+                    if child.text:
+                        s_token += child.text
+                    if child.tail:
+                        s_token += child.tail
+        else:
+            s_token = w.text
         
         # edit token (lower pour eviter les majuscules en début de phrase, rstrip pour éviter les points agglutinés sur le token)
         s_token = s_token.replace('[', '').replace('(', '').replace(']', '').replace(')', '').rstrip('-')

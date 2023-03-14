@@ -576,7 +576,9 @@ def conversion_conllu2xml(inputfile, outputfile):
 
     ET.ElementTree(data).write(outputfile, encoding="utf-8")
 
-def synchronisation_xml(functionw, xmlw, compil):
+def synchronisation_xml(functionw, xmlw, compil, option):
+    if option == None:
+        option = ''
     
     """
     Fonction permettant de comparer deux fichiers XML-TEI ayant la même numérotation des éléments structurant
@@ -676,7 +678,7 @@ def synchronisation_xml(functionw, xmlw, compil):
                             # On boucle sur les w
 
                         for word in sentence.findall('.//w'):
-                            print(word.text)
+                            #dev print(word.text)
                             word_nb = word.get('n')
                                 # On nomme les coordonnées de la phrase
 
@@ -685,88 +687,56 @@ def synchronisation_xml(functionw, xmlw, compil):
 
                             #coord[address]['lemma_src'] = word.get('lemma_src')
 
-                            word.set('udpos', word.get('udpos'))
+                            if option == 'reparse':
 
-                            word.set('retagging',  coord[address]['udpos'])
-                            
-                            #coord[address]['lemma'] = word.get('lemma')
-                            word.set('lemma', word.get('lemma'))
+                                word.set('udpos', word.get('udpos'))
+                                word.set('retagging',  coord[address]['udpos'])
+                                #coord[address]['lemma'] = word.get('lemma')
+                                word.set('lemma', word.get('lemma'))
+                                word.set('head', coord[address]['head'])
+                                word.set('function', coord[address]['function'])
+                                word.set('prpos',  word.get('prpos'))
+                                word.set('uppos', word.get('uppos'))
 
-                            word.set('head', coord[address]['head'])
-
-                            word.set('function', coord[address]['function'])
-
-                            word.set('prpos',  word.get('prpos'))
-
-                            word.set('uppos', word.get('uppos'))
-
-                            if word.get('join'):
-                                coord[address]['join'] = word.get('join')
-                            else:
-                                coord[address]['join'] = '_'
-
-                            word.set('join', coord[address]['join'])
-
-                            word.attrib['n'] = word.attrib.pop('n')
-                            word.attrib['head'] = word.attrib.pop('head')
-                            word.attrib['function'] = word.attrib.pop('function')
-                            word.attrib['udpos'] = word.attrib.pop('udpos')
-                            word.attrib['prpos'] = word.attrib.pop('prpos')
-                            word.attrib['uppos'] = word.attrib.pop('uppos')
-                            word.attrib['retagging'] = word.attrib.pop('retagging')
-                            word.attrib['lemma'] = word.attrib.pop('lemma')
-                            
-                            
-                            #word.attrib['lemma_src'] = word.attrib.pop('lemma_src')
-                            word.attrib['join'] = word.attrib.pop('join')
-                            
-                            #dev print(word.attrib)
-
-                            '''
-                            if address in coord.keys():
                                 if word.get('join'):
                                     coord[address]['join'] = word.get('join')
                                 else:
                                     coord[address]['join'] = '_'
 
-                                if word.get('incoherence'):
-                                    coord[address]['incoherence'] = word.get('incoherence')
-                                else:
-                                    coord[address]['incoherence'] = '_'
+                                word.set('join', coord[address]['join'])
 
-                                if word.get('NoMatchingPresto'):
-                                    coord[address]['NoMatchingPresto'] = word.get('NoMatchingPresto')
-                                else:
-                                    coord[address]['NoMatchingPresto'] = '_'
-
-                                if word.get('NoConvUPenn'):
-                                    coord[address]['NoConvUPenn'] = word.get('NoConvUPenn')
-                                else:
-                                    coord[address]['NoConvUPenn'] = '_'
-                            '''
-
-
-                            '''
-                            if word.get('udpos'):
-                                coord[address]['udpos'] = word.get('udpos')
+                                word.attrib['n'] = word.attrib.pop('n')
+                                word.attrib['head'] = word.attrib.pop('head')
+                                word.attrib['function'] = word.attrib.pop('function')
+                                word.attrib['udpos'] = word.attrib.pop('udpos')
+                                word.attrib['prpos'] = word.attrib.pop('prpos')
+                                word.attrib['uppos'] = word.attrib.pop('uppos')
+                                word.attrib['retagging'] = word.attrib.pop('retagging')
+                                word.attrib['lemma'] = word.attrib.pop('lemma')
+                                
+                                
+                                #word.attrib['lemma_src'] = word.attrib.pop('lemma_src')
+                                word.attrib['join'] = word.attrib.pop('join')
+                            
                             else:
-                                coord[address]['udpos'] = '_'
+                                word.set('udpos', coord[address]['udpos'])
+                                word.set('head', coord[address]['head'])
+                                word.set('function', coord[address]['function'])
 
-                            if word.get('head'):
-                                coord[address]['head'] = word.get('head')
-                            else:
-                                coord[address]['head'] = '_'
+                                if word.get('join'):
+                                    coord[address]['join'] = word.get('join')
+                                else:
+                                    coord[address]['join'] = '_'
 
-                            if word.get('function'):
-                                coord[address]['function'] = word.get('function')
-                            else:
-                                coord[address]['function'] = '_'
+                                word.set('join', coord[address]['join'])
 
-                            '''    
-                            #word.attrib = coord[address]
-
-                            #if address2 in coord2.keys():
-                                #word.text = coord2[address2]
+                                word.attrib['n'] = word.attrib.pop('n')
+                                word.attrib['head'] = word.attrib.pop('head')
+                                word.attrib['function'] = word.attrib.pop('function')
+                                word.attrib['udpos'] = word.attrib.pop('udpos')
+                                word.attrib['join'] = word.attrib.pop('join')
+                            
+                            #dev print(word.attrib)
 
     # On écrit le TEI obtenu dans le fichier spécifié en second paramètre.
     

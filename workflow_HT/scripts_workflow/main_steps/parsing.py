@@ -44,7 +44,7 @@ def parse():
             print('Parsing done')
             conversion_conllu2xml(output_conllu_tempfile, output_xml_tempfile)
 
-            synchronisation_xml(output_xml_tempfile, input_path, output_path)
+            synchronisation_xml(output_xml_tempfile, input_path, output_path, 'parse')
             print('Conversion done')
             pb.destroy()
             print(input_conllu_tempfile)
@@ -62,7 +62,7 @@ def parse():
         print('Parsing done')
         conversion_conllu2xml(output_conllu_tempfile, output_xml_tempfile)
 
-        synchronisation_xml(output_xml_tempfile, input_path, output_path)
+        synchronisation_xml(output_xml_tempfile, input_path, output_path, 'parse')
         print('Conversion done')
         pb.destroy()
         
