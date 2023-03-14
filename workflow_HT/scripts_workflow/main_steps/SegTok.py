@@ -336,6 +336,7 @@ def saveFile():
     for i in file:
 
         i = re.sub('-\n', '', i)
+        i = re.sub('¬\n', '', i)
         i = re.sub('\n', ' ', i)
 
         # nombre latin
