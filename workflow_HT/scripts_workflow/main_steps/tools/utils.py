@@ -577,8 +577,6 @@ def conversion_conllu2xml(inputfile, outputfile):
     ET.ElementTree(data).write(outputfile, encoding="utf-8")
 
 def synchronisation_xml(functionw, xmlw, compil, option):
-    if option == None:
-        option = ''
     
     """
     Fonction permettant de comparer deux fichiers XML-TEI ayant la même numérotation des éléments structurant
