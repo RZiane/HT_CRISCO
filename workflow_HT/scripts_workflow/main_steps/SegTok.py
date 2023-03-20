@@ -109,13 +109,12 @@ def set_options_punct():
     point_interrogation = ('?', CheckVar3.get())
     point_exclamation = ('!', CheckVar4.get())
     deux_points = (':', CheckVar5.get())
-    points_suspension = ('...', CheckVar6.get())
-    points_suspension2 = ('…', CheckVar6.get())
+    points_suspension = ('…', CheckVar6.get())
     
-    list_ponct_fortes = [point, point_virgule, point_interrogation, point_exclamation, deux_points, points_suspension, points_suspension2]
+    list_ponct_fortes = [point, point_virgule, point_interrogation, point_exclamation, deux_points, points_suspension]
     
     fenetre_options_punct.destroy()
-    print(list_ponct_fortes)
+    #dev print(list_ponct_fortes)
 
 def len_settings():
     
@@ -275,9 +274,9 @@ def upload_path():
 
 def browseFile():
     global source
-    global label_upload
+    global label_upload_path
     try:
-        label_upload.destroy()
+        label_upload_path.destroy()
     except:
         pass
 
@@ -289,17 +288,26 @@ def browseFile():
     if source_path != '':
         var_msg = "This file is uploaded:\n"+source_path+""
 
-        label_upload = Label(frame,
+        label_upload_path = Label(upload_insert_frame,
                             text=var_msg,                       
                             font=("Ubuntu", 10), fg="black", bg="white")
 
-        label_upload.pack()
+        label_upload_path.pack()
 
         download_insert_frame.pack()
         label_download.pack()
         label_download2.pack()
         bouton_option_punct.pack()
         bouton_download.pack()
+    else:
+        var_msg = "No file uploaded"
+
+        label_upload_path = Label(upload_insert_frame,
+                            text=var_msg,                       
+                            font=("Ubuntu", 10), fg="black", bg="white")
+
+        label_upload_path.pack()
+
     
 def saveFile():
     global dir_file
@@ -370,7 +378,8 @@ def saveFile():
             i = i.replace(x[0], sub)
 
         i = re.sub('  ', ' ', i)
-        i = re.sub('\.\.\.', '…', i)
+        i = i.replace('...', '…')
+        #i = re.sub('\.\.\.', '…', i)
         i = re.sub(':', ' :', i)
         i = re.sub('\?', ' ?', i)
         i = re.sub('\!', ' !', i)
@@ -411,23 +420,10 @@ def saveFile():
     if punct_forte_selec == []:
         regex_split_sents = r'\s*(\S.{1,}?(?:[0-9a-zàáâäçèéêëîïôöùúûüÿ\»\)\]\s]\.\s?\»?\"?|$))(?=(?:\s+[&A-ZÀÁÂÄÇÈÉÊÌÍÎÏÒÓÔÖÙÚ])|$)'
     else:
-        if len(punct_forte_selec)==1 and punct_forte_selec[0] == '\...':
-            regex_split_sents = r'\s*(\S.{1,}?(?:[0-9a-zàáâäçèéêëîïôöùúûüÿ\»\)\]\s\.]\.\s?\»?\"?|$)(?=(?:\s+[&A-ZÀÁÂÄÇÈÉÊÌÍÎÏÒÓÔÖÙÚa-zàáâäçèéêëîïôöùúûüÿ])|$))'
-        elif '\...' in punct_forte_selec and '\.' not in punct_forte_selec:
-            punct_forte_selec.remove('\...')
-            segmenteur = ''.join(punct_forte_selec)
-            regex_split_sents = r'\s*(\S.{1,}?(?:[0-9a-zàáâäçèéêëîïôöùúûüÿ\»\)\]\s](?:['+segmenteur+r']|\.{3})\s?\»?\"?|$)(?=(?:\s+[&A-ZÀÁÂÄÇÈÉÊÌÍÎÏÒÓÔÖÙÚa-zàáâäçèéêëîïôöùúûüÿ])|$))'
-        elif '\...' in punct_forte_selec and '\.' in punct_forte_selec and len(punct_forte_selec)>2:
-            punct_forte_selec.remove('\...')
-            segmenteur = ''.join(punct_forte_selec)
-            regex_split_sents = r'\s*(\S.{1,}?(?:[0-9a-zàáâäçèéêëîïôöùúûüÿ\»\)\]\s\.](?:['+segmenteur+r']|\.)\s?\»?\"?|$)(?=(?:\s+[&A-ZÀÁÂÄÇÈÉÊÌÍÎÏÒÓÔÖÙÚa-zàáâäçèéêëîïôöùúûüÿ])|$))'
-        elif '\...' not in punct_forte_selec:
-            segmenteur = ''.join(punct_forte_selec)
-            regex_split_sents = r'\s*(\S.{1,}?(?:[0-9a-zàáâäçèéêëîïôöùúûüÿ\»\)\]\s](?:['+segmenteur+r'])\s?\»?\"?|$)(?=(?:\s+[&A-ZÀÁÂÄÇÈÉÊÌÍÎÏÒÓÔÖÙÚa-zàáâäçèéêëîïôöùúûüÿ])|$))'
-        else:
-            segmenteur = ''.join(punct_forte_selec)
-            regex_split_sents = r'\s*(\S.{1,}?(?:[0-9a-zàáâäçèéêëîïôöùúûüÿ\»\)\]\s\.](?:['+segmenteur+r"])\s?\»?\"?|$))(?=(?:\s+[&A-ZÀÁÂÄÇÈÉÊÌÍÎÏÒÓÔÖÙÚ]|$))"
-    print(regex_split_sents) 
+        segmenteur = ''.join(punct_forte_selec)
+        regex_split_sents = r'\s*(\S.{1,}?(?:[0-9a-zàáâäçèéêëîïôöùúûüÿ\»\)\]\s\.](?:['+segmenteur+r"])\s?\»?\"?|$))(?=(?:\s+[&A-ZÀÁÂÄÇÈÉÊÌÍÎÏÒÓÔÖÙÚ]|$))"
+
+    #dev print(regex_split_sents) 
     
     # édition de la liste de travail avec la segmentation souhaitée (chapitre/paragraphe/phrase/token)  
     for i in file2:
@@ -444,6 +440,10 @@ def saveFile():
             
             if i.startswith('<head>'):
                 list_para.append(i)
+
+            elif i.startswith('<note>'):
+                list_para.append(i) 
+
             else:
                 para = re.split(regex_split_sents, i)
 
@@ -623,7 +623,7 @@ def saveFile():
                     ID_para += 1
                     ID_sent = 0
                     if type(para[0])==str:
-                        if para[0].startswith('<head>'):
+                        if para[0].startswith('<head>') or para[0].startswith('<note>'):
 
                             para[0] = para[0].replace('#1', '.')
                             out.write(para[0])

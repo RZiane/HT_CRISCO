@@ -904,10 +904,12 @@ def resolv_ambi(inputfile, outputfile):
                 if b_spot_aux == False:
                     w.set('uppos', 'VX')
                     w.set('prpos', 'Vvn')
+                    w.set('ambiguite', 'xcomp')
                     
                 elif b_spot_aux == True:
                     w.set('uppos', 'VJ')
                     w.set('prpos', 'Vvc')
+                    w.set('ambiguite', 'xcomp')
 
             # acl
             if w.get('uppos') ==  'VPP///VJ' and w.get('function') ==  'acl':
@@ -925,10 +927,12 @@ def resolv_ambi(inputfile, outputfile):
                 if b_spot_child == True:
                     w.set('uppos', 'VPP')
                     w.set('prpos', 'Ge')
+                    w.set('ambiguite', 'acl')
                 
                 else:
                     w.set('uppos', 'VJ')
                     w.set('prpos', 'Vvc')
+                    w.set('ambiguite', 'acl')
 
 
 

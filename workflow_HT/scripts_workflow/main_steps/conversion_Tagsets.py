@@ -3,6 +3,7 @@ import itertools
 import sys, getopt
 
 from tools.utils import indent_xml
+from tools.utils import renum_xml
 from tools.utils import def_args
 from tools.utils import make_d_PRESTO
 from tools.utils import make_d_CorrTable
@@ -10,8 +11,13 @@ from tools.utils import make_d_CorrTable
 from tqdm import tqdm
 import time,sys
 
+'''
 path_PRESTO = "/home/ziane212/crisco_work_ressources/dico_PRESTO_SIMPLE_10.01.23.dff"
-path_CorrTable = "/home/ziane212/crisco_work_ressources/MICLE_CorrTable_27-02-23.csv"
+path_CorrTable = "/home/ziane212/crisco_work_ressources/MICLE_CorrTable_13-02-23.csv"
+'''
+
+path_PRESTO = "C:/Users/yagam/Desktop/crisco_ressources/dico_PRESTO_SIMPLE_08.03.23.dff"
+path_CorrTable = "C:/Users/yagam/Desktop/crisco_ressources/MICLE_CorrTable_27-02-23.csv"
 
 # gestion des conversions Upenn particulières, éditions des listes de lemmes et definition d'une fonction qui regroupe toutes les conditions
 
@@ -348,4 +354,5 @@ if __name__ == "__main__":
    print("Processing dictionnary...")
    d_PRESTO = make_d_PRESTO(path_PRESTO)
    print("Processing file...")
+   renum_xml(inputfile, inputfile)
    process_conversion(inputfile, outputfile)
