@@ -32,7 +32,7 @@ def lemmatisation(entry, tag, list_prpos, list_prfeat, list_lemma):
             if entry[1] == prpos and entry[2] == prfeat:
                 list_lemma.append(entry[3].lower())
 
-def process_lemmatisation(inputfile, outputfile):
+def process_lemmatisation(inputfile, outputfile, d_CorrTable, d_PRESTO):
     tree = ET.parse(open(inputfile, encoding='utf-8'))
     root = tree.getroot()
 
@@ -142,5 +142,5 @@ if __name__ == "__main__":
    print("Processing dictionnary...")   
    d_PRESTO = make_d_PRESTO(path_PRESTO)
    print("Processing file...")
-   process_lemmatisation(inputfile, outputfile)
+   process_lemmatisation(inputfile, outputfile, d_CorrTable, d_PRESTO)
         

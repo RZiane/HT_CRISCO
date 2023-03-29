@@ -459,6 +459,7 @@ def conversion_conllu2xml(inputfile, outputfile):
         })
         
         mot.text = word['token_word']
+        print(mot.text)
         
         #On reconstruit la structure jusqu'au niveau de la phrase.
         
