@@ -354,5 +354,5 @@ if __name__ == "__main__":
    print("Processing dictionnary...")
    d_PRESTO = make_d_PRESTO(path_PRESTO)
    print("Processing file...")
-   renum_xml(inputfile, inputfile)
+   #renum_xml(inputfile, inputfile)
    process_conversion(inputfile, outputfile)
