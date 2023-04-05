@@ -3,6 +3,7 @@ import xml.etree.ElementTree as ET
 import copy
 from tqdm import tqdm
 import re
+import requests
 
 def def_args(argv):
    inputfile = ''
@@ -22,6 +23,45 @@ def def_args(argv):
    return inputfile, outputfile
 
 ### XML processing ##############################################
+def reorderAttrib(root):
+    for word in root.findall('.//w'):
+
+        if word.get('join')!=None:
+            word.attrib['join'] = word.attrib.pop('join')
+
+        if word.get('n')!=None:
+            word.attrib['n'] = word.attrib.pop('n')
+
+        if word.get('head')!=None:
+            word.attrib['head'] = word.attrib.pop('head')
+
+        if word.get('function')!=None:
+            word.attrib['function'] = word.attrib.pop('function')
+
+        if word.get('lemma')!=None:
+            word.attrib['lemma'] = word.attrib.pop('lemma')
+
+        if word.get('udpos')!=None:
+            word.attrib['udpos'] = word.attrib.pop('udpos')
+
+        if word.get('prpos')!=None:
+            word.attrib['prpos'] = word.attrib.pop('prpos')
+
+        if word.get('uppos')!=None:
+            word.attrib['uppos'] = word.attrib.pop('uppos')
+
+        if word.get('retagging')!=None:
+            word.attrib['retagging'] = word.attrib.pop('retagging')
+
+        if word.get('NoMatchingPresto')!=None:
+            word.attrib['NoMatchingPresto'] = word.attrib.pop('NoMatchingPresto')
+
+        if word.get('ambiguite')!=None:
+            word.attrib['ambiguite'] = word.attrib.pop('ambiguite')
+
+        if word.get('fiabilite')!=None:
+            word.attrib['fiabilite'] = word.attrib.pop('fiabilite')
+
 def indent_xml(elem, level=0, more_sibs=False):
     i = "\n"
     if level:
@@ -677,7 +717,8 @@ def synchronisation_xml(functionw, xmlw, compil, option):
                             # On boucle sur les w
 
                         for word in sentence.findall('.//w'):
-                            #dev print(word.text)
+                            #dev 
+                            print(word.text)
                             word_nb = word.get('n')
                                 # On nomme les coordonnées de la phrase
 
@@ -746,6 +787,12 @@ def synchronisation_xml(functionw, xmlw, compil, option):
 
 ### Lemmatisation/Conversion tagsets ##########################
 def make_d_PRESTO(path_PRESTO):
+    '''
+    url = "https://unicloud.unicaen.fr/index.php/s/An5wqjdLHiPFwKt/download/dico_PRESTO_SIMPLE_10.01.23.dff"
+    r = requests.get(url, allow_redirects=True)
+    path_PRESTO = '/home/ziane212/crisco_work_ressources/test/presto.dff'
+    open(path_PRESTO, 'wb').write(r.content)
+    '''
     #création du dictionnaire python à partir du dictionnaire PRESTO
     PRESTO = open(path_PRESTO, encoding='utf-8')
 
@@ -766,6 +813,12 @@ def make_d_PRESTO(path_PRESTO):
     return d_PRESTO
 
 def make_d_CorrTable(path_CorrTable):
+    '''
+    url = "https://unicloud.unicaen.fr/index.php/s/An5wqjdLHiPFwKt/download/dico_PRESTO_SIMPLE_10.01.23.dff"
+    r = requests.get(url, allow_redirects=True)
+    path_CorrTable = '/home/ziane212/crisco_work_ressources/test/corrTable.csv'
+    open(path_CorrTable, 'wb').write(r.content)
+    '''
     #création du dictionnaire python à partir de la table de conversion
     CorrTable = open(path_CorrTable, encoding='utf-8')
     d_CorrTable = {}
@@ -786,7 +839,7 @@ def resolv_ambi(inputfile, outputfile):
     root = tree.getroot()
 
     l_function_AUX = ['aux', 'aux:pass', 'cop']
-    l_function_VERB = ['root', 'ccomp', 'acl:relcl', 'parataxis']
+    l_function_VERB = ['root', 'ccomp', 'acl:relcl', 'parataxis', 'conj']
     l_lemma_AUX = ['être', 'avoir']
 
     for id_, s in enumerate(root.findall('.//s')):
@@ -795,7 +848,7 @@ def resolv_ambi(inputfile, outputfile):
             
             # classique
             if (w.get('uppos') ==  'VPP///VJ' or w.get('uppos') ==  'EPP///EJ' or w.get('uppos') ==  'APP///AJ') and w.get('function')in l_function_VERB :
-                id_w = w.get('n')
+                id_parent = w.get('n')
                 
                 for w2 in root.findall('.//s')[id_]:
 
@@ -804,7 +857,7 @@ def resolv_ambi(inputfile, outputfile):
                                 
                         var = True
                     
-                    if w2.get('head') == id_w and w2.get('udpos') == 'AUX' and w2.get('function') in l_function_AUX and w2.get('lemma') in l_lemma_AUX:
+                    if w2.get('head') == id_parent and w2.get('udpos') == 'AUX' and w2.get('function') in l_function_AUX and w2.get('lemma') in l_lemma_AUX:
                         
                         if w.get('uppos') ==  'VPP///VJ':
                             w.set('uppos', 'VPP')
@@ -828,15 +881,19 @@ def resolv_ambi(inputfile, outputfile):
                     elif w.get('uppos') ==  'EPP///EJ':
                         w.set('uppos', 'EJ')
                         w.set('prpos', 'Vuc')
+
+                    w.set('ambiguite', 'standard')
+                    
+                    
             
             # doubles auxiliaires
             if w.get('uppos') ==  'APP///AJ' or w.get('uppos') ==  'EPP///EJ':
                 
-                head_w = w.get('head')
+                head_parent = w.get('head')
                 function_w = w.get('function')
                 
                 for w2 in root.findall('.//s')[id_]:
-                    if w2.get('n') == head_w:
+                    if w2.get('n') == head_parent:
                         id_parent = w2.get('n')
                         udpos_parent = w2.get('udpos')
                         uppos_parent = w2.get('uppos')
@@ -880,16 +937,16 @@ def resolv_ambi(inputfile, outputfile):
             # conj
             if (w.get('uppos') ==  'VPP///VJ' or w.get('uppos') ==  'APP///AJ' or w.get('uppos') ==  'EPP///EJ') and w.get('function') ==  'conj':
                 
-                head_w = w.get('head')
-                id_w = w.get('n')
+                head_parent = w.get('head')
+                id_parent = w.get('n')
 
                 for w2 in root.findall('.//s')[id_]:
-                    if w2.get('head') == id_w and (w2.get('function') == 'nsubj' or w2.get('function') == 'expl'):
+                    if w2.get('head') == id_parent and (w2.get('function') == 'nsubj' or w2.get('function') == 'expl'):
                         w.set('uppos', 'VJ')
                         w.set('prpos', 'Vvc')
                         w.set('ambiguite', 'subj')
                 
-                    elif w2.get('n') == head_w and w2.get('udpos') == 'VERB' and w2.get('uppos') == 'VPP' :
+                    elif w2.get('n') == head_parent and w2.get('udpos') == 'VERB' and w2.get('uppos') == 'VPP' :
                         id_parent = w2.get('n')
                         
                         for w3 in root.findall('.//s')[id_]:
@@ -905,7 +962,7 @@ def resolv_ambi(inputfile, outputfile):
                                     w.set('prpos', 'Ge')
                                 w.set('ambiguite', 'conj')
                     
-                    elif w2.get('n') == head_w and w2.get('udpos') == 'VERB' and w2.get('uppos') == 'VJ' :
+                    elif w2.get('n') == head_parent and w2.get('udpos') == 'VERB' and (w2.get('uppos') == 'VJ' or w2.get('uppos') == 'EJ' or w2.get('uppos') == 'AJ') :
                         if w2.get('lemma')=='être':
                             w.set('uppos', 'EJ')
                             w.set('prpos', 'Vuc')
@@ -921,14 +978,14 @@ def resolv_ambi(inputfile, outputfile):
             # xcomp
             if w.get('uppos') ==  'VPP///VJ' and w.get('function') ==  'xcomp':
                 
-                head_w = w.get('head')
-                id_w = w.get('n')
+                head_parent = w.get('head')
+                id_parent = w.get('n')
 
                 b_spot_aux = False
 
                 for w2 in root.findall('.//s')[id_]:
 
-                    if w2.get('head') == id_w and w2.get('udpos') == 'AUX' and w2.get('lemma') in l_lemma_AUX:
+                    if w2.get('head') == id_parent and w2.get('udpos') == 'AUX' and w2.get('lemma') in l_lemma_AUX:
                         b_spot_aux = True
 
                 if b_spot_aux == False:
@@ -945,14 +1002,14 @@ def resolv_ambi(inputfile, outputfile):
             # advcl
             if (w.get('uppos') ==  'VPP///VJ' or w.get('uppos') ==  'APP///AJ' or w.get('uppos') ==  'EPP///EJ') and w.get('function') ==  'advcl':
                 
-                head_w = w.get('head')
-                id_w = w.get('n')
+                head_parent = w.get('head')
+                id_parent = w.get('n')
 
                 b_spot_aux = False
 
                 for w2 in root.findall('.//s')[id_]:
 
-                    if w2.get('head') == id_w and w2.get('udpos') == 'AUX' and w2.get('lemma') in l_lemma_AUX:
+                    if w2.get('head') == id_parent and w2.get('udpos') == 'AUX' and w2.get('lemma') in l_lemma_AUX:
                         b_spot_aux = True
 
                 if b_spot_aux == False:
@@ -970,7 +1027,7 @@ def resolv_ambi(inputfile, outputfile):
                     else:
                         w.set('uppos', 'VPP')
                         w.set('prpos', 'Ge')
-                    w.set('ambiguite', 'xcomp')
+                    w.set('ambiguite', 'advcl')
             '''
             # acl
             if w.get('uppos') ==  'VPP///VJ' and w.get('function') ==  'acl':
@@ -996,6 +1053,8 @@ def resolv_ambi(inputfile, outputfile):
                     w.set('ambiguite', 'acl')
             '''
     indent_xml(root)
+
+    reorderAttrib(root)
 
     ET.ElementTree(root).write(outputfile, encoding="utf-8")
 
