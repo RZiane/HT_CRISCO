@@ -336,7 +336,7 @@ def saveFile():
 
     file = ''.join(file)
     file = re.sub("#### 1 ####\n\n", '', file)
-    file = re.sub("\n####\s\d*\s####\n\n", '', file)
+    file = re.sub("\n####\s[\d\S]*\s####\n\n", '', file)
     file = file.split('\n\n')
     #file = ''.join(file)
         
@@ -518,7 +518,7 @@ def saveFile():
                                         sent.append(punct_token[0][1])
                                     else:
                                         sent.insert(id_token+1, punct_token[0][1])
-
+                    '''
                     for token in sent:
                         if '</hi>' in token:
                             id_token = sent.index(token)
@@ -542,7 +542,7 @@ def saveFile():
                                     processed_hi.append(part_hi+attrib)
 
                             sent[id_token] = '_'.join(processed_hi)
-                    
+                    '''                    
                     sent = "_".join(sent).split("_")
 
                     ### dev ########################################################################################################

@@ -221,6 +221,7 @@ def lemmatisation():
     update_progress(100)
 
     print('Lemmatisation done')
+    pb.destroy()
     label_lemmatisation_done.pack()
 
 fenetre = Tk()
