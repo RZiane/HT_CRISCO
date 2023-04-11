@@ -1,22 +1,6 @@
 import sys, getopt
 import xml.etree.ElementTree as ET
-
-def main(argv):
-   global inputfile
-   global outputfile
-   inputfile = ''
-   outputfile = ''
-   opts, args = getopt.getopt(argv,"hi:o:",["ifile=","ofile="])
-   for opt, arg in opts:
-      if opt == '-h':
-         print ('test.py -i <inputfile> -o <outputfile>')
-         sys.exit()
-      elif opt in ("-i", "--ifile"):
-         inputfile = arg
-      elif opt in ("-o", "--ofile"):
-         outputfile = arg
-   print ('Input file is ', inputfile)
-   print ('Output file is ', outputfile)
+from utils import def_args
    
 def extract_lg(inputfile, outputfile):
     tree = ET.parse(open(inputfile, encoding='utf-8'))
@@ -63,5 +47,5 @@ def extract_lg(inputfile, outputfile):
             out.write('\n')
 
 if __name__ == "__main__":
-   main(sys.argv[1:])
+   inputfile, outputfile = def_args(sys.argv[1:])
    extract_lg(inputfile, outputfile)

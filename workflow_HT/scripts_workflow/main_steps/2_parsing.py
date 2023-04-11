@@ -46,7 +46,6 @@ def parse():
             synchronisation_xml(output_xml_tempfile, input_path, output_path, 'parse')
             print('Conversion done')
             pb.destroy()
-            print(input_conllu_tempfile)
 
     except NameError:
         input_conllu_tempfile = input_path.rstrip('.xml')+'_input_temp.conllu'
@@ -109,6 +108,7 @@ def browseFile_input():
     global label_upload_input
     try:
         label_upload_input.destroy()
+        bouton_upload_outputfile.destroy()
     except:
         pass
 
@@ -143,6 +143,7 @@ def browseFile_output():
     global label_upload_output
     try:
         label_upload_output.destroy()
+        bouton_upload_modelpath.destroy()
     except:
         pass
 
@@ -176,6 +177,7 @@ def browseFile_model():
     global label_upload_model
     try:
         label_upload_model.destroy()
+        bouton_open_parse.destroy()
     except:
         pass
 

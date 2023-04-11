@@ -55,7 +55,7 @@ def process_lemmatisation(inputfile, outputfile, d_CorrTable, d_PRESTO):
             s_token = w.text
         
         # edit token (lower pour eviter les majuscules en début de phrase, rstrip pour éviter les points agglutinés sur le token)
-        s_token = s_token.replace('[', '').replace('(', '').replace(']', '').replace(')', '').rstrip('-')
+        s_token = s_token.replace('[', '').replace('(', '').replace(']', '').replace(')', '').replace('\t', '').replace('\n', '').rstrip('-')
         if s_token.endswith('.') and len(s_token)!=1:
             s_token = s_token.replace('.', '')
         

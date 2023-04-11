@@ -434,20 +434,22 @@ def conversion_conllu2xml(inputfile, outputfile):
             info_token[9] = info_token[9].rstrip('\n')
             misc_temp = info_token[9].split('|')
             misc = {}
+            print(info_token[9])
             for id_, j in enumerate(misc_temp):
                 misc_temp[id_] = misc_temp[id_].split('=')
                 misc[misc_temp[id_][0].replace(' ', '')] = misc_temp[id_][1].replace(' ', '')
             
-            if 'incoherence' in misc.keys():
+            if 'rend' in misc.keys():
                 pass
             else:
-                misc['incoherence'] = '_'
-                
+                misc['rend'] = '_'
+                            
             if 'prpos' in misc.keys():
                 pass
             else:
                 misc['prpos'] = '_'
             '''
+            
 
             words.append({
                 'book' : sentence['book'],
@@ -461,7 +463,8 @@ def conversion_conllu2xml(inputfile, outputfile):
                 'token_ud' : info_token[3],
                 'token_up' : info_token[4],
                 'token_head' : info_token[6],
-                'token_function' : info_token[7]
+                'token_function' : info_token[7], 
+                'misc' : info_token[9].rstrip('\n')
                                 })
 
     #On écrit l'XML en remplissant les éléments avec les différentes variables
@@ -496,10 +499,10 @@ def conversion_conllu2xml(inputfile, outputfile):
             'lemma': word['token_lemma'],
             'head': word['token_head'],
             'function': word['token_function'],
+            'misc': word['misc']
         })
         
         mot.text = word['token_word']
-        print(mot.text)
         
         #On reconstruit la structure jusqu'au niveau de la phrase.
         
@@ -614,6 +617,7 @@ def conversion_conllu2xml(inputfile, outputfile):
     data.append(livre)
     
     indent_xml(data)
+    reorderAttrib(data)
 
     ET.ElementTree(data).write(outputfile, encoding="utf-8")
 
@@ -718,7 +722,6 @@ def synchronisation_xml(functionw, xmlw, compil, option):
 
                         for word in sentence.findall('.//w'):
                             #dev 
-                            print(word.text)
                             word_nb = word.get('n')
                                 # On nomme les coordonnées de la phrase
 
