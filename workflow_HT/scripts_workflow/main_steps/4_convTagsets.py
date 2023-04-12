@@ -2,11 +2,8 @@ from tkinter import *
 from tkinter import filedialog
 from tkinter import ttk
 import time
-from tools.utils import renum_xml, make_d_CorrTable, make_d_PRESTO
-from tools.lemmatisation import process_lemmatisation
-
-import threading
-    
+from tools.utils import make_d_CorrTable, make_d_PRESTO
+from tools.conversion_Tagsets import process_conversion    
 
 def make_path(source):
     global source_path
@@ -121,10 +118,10 @@ def browseFile_dict():
 
 def browseFile_convTable():
     global label_upload_convTable
-    global bouton_lemmatisation
+    global bouton_convTagsets
     try:
         label_upload_convTable.destroy()
-        bouton_lemmatisation.destroy()
+        bouton_convTagsets.destroy()
     except:
         pass
 
@@ -142,12 +139,12 @@ def browseFile_convTable():
 
         label_upload_convTable.pack()
 
-        lemmatisation_frame.pack()
-        label_lemmatisation.pack()
-        bouton_lemmatisation = Button(lemmatisation_frame, text="LEMMATISATION",
-                       command=lemmatisation, fg="#4065A4", bg="white")
+        convTagsets_frame.pack()
+        label_convTagsets.pack()
+        bouton_convTagsets = Button(convTagsets_frame, text="TAGSET CONVERSION",
+                       command=convTagset, fg="#4065A4", bg="white")
 
-        bouton_lemmatisation.pack()
+        bouton_convTagsets.pack()
     
     global convTable_path
     convTable_path = source_path
@@ -156,22 +153,23 @@ def update_progress(value):
     pb["value"] = value
     fenetre.update()
 
-def lemmatisation():
+def convTagset():
     try:
-        label_lemmatisation_done.destroy()
+        label_convTagsets_done.destroy()
     except:
         pass
 
     # progressbar
     global pb
     pb = ttk.Progressbar(
-        lemmatisation_frame,
+        convTagsets_frame,
         orient='horizontal',
         mode='determinate',
         length=280
     )
 
     pb.pack()
+
     time.sleep(2)
     fenetre.update()
 
@@ -188,25 +186,24 @@ def lemmatisation():
     time.sleep(2)
 
     print("Processing file...")
-    process_lemmatisation(input_path, output_path, d_CorrTable, d_PRESTO)
+    process_conversion(input_path, output_path, d_CorrTable, d_PRESTO)
     update_progress(100)
 
-    print('Lemmatisation done')
+    print('ConvTagsets done')
     pb.destroy()
 
-
-    label_lemmatisation_done = Label(lemmatisation_frame, text="The lemmatisation is complete.\nYou can close the window or lemmatise another file.",
+    label_convTagsets_done = Label(convTagsets_frame, text="The conversion is complete.\nYou can close the window or convert another file.",
                    font=("Ubuntu", 18), fg="black", bg="white")
-    label_lemmatisation_done.pack()
+    label_convTagsets_done.pack()
 
 fenetre = Tk()
 
-fenetre.title("File lemmatisation")
+fenetre.title("File tagsets conversion")
 fenetre.geometry("1080x520")
 fenetre.minsize(1080, 520)
 fenetre.config(bg="white")
 
-label_title = Label(fenetre, text="Lemmatize your xml file",
+label_title = Label(fenetre, text="Convert the tagset on your xml file",
                     font=("Ubuntu", 24), fg="black", bg="white")
 label_title.pack(side="top")
 
@@ -243,10 +240,10 @@ convTable_frame = Frame(frame, bg="white")
 label_convTable = Label(convTable_frame, text="Click on the following button to select your convertion table file",
                    font=("Ubuntu", 18), fg="black", bg="white")
 
-global lemmatisation_frame
-lemmatisation_frame= Frame(frame, bg="white")
+global convTagsets_frame
+convTagsets_frame= Frame(frame, bg="white")
 
-label_lemmatisation = Label(lemmatisation_frame, text="Click on the following button to lemmatize your file",
+label_convTagsets = Label(convTagsets_frame, text="Click on the following button to convert the tagset on your file",
                    font=("Ubuntu", 18), fg="black", bg="white")
 
 fenetre.mainloop()
