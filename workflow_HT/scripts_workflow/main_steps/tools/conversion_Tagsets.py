@@ -2,11 +2,11 @@ import xml.etree.ElementTree as ET
 import itertools
 import sys, getopt
 
-from utils import indent_xml
-from utils import renum_xml
-from utils import def_args
-from utils import make_d_PRESTO
-from utils import make_d_CorrTable
+from tools.utils import indent_xml
+from tools.utils import renum_xml
+from tools.utils import def_args
+from tools.utils import make_d_PRESTO
+from tools.utils import make_d_CorrTable
 
 from tqdm import tqdm
 import time,sys
