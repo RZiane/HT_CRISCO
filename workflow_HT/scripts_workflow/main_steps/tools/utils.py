@@ -265,8 +265,7 @@ def conversion_xml2conllu(inputfile, outputfile):
                         for sentence in para.findall('.//s'):
                             sentence_nb = sentence.get('n')
                             sentence_ch = int(sentence_nb)
-                            book_ch = 1
-                            book_nb = "1"
+
                             if book_ch == chapter_ch == section_ch == para_ch == sentence_ch == 1:
                                 balise_sent = '# sent_id = '+book_nb+'-'+chapter_nb+'-'+section_nb+'-'+para_nb+'-'+sentence_nb+'\n'
 
