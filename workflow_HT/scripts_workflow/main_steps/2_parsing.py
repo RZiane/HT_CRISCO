@@ -198,7 +198,7 @@ def browseFile_model():
         parse_frame.pack()
         label_parse.pack()
 
-        bouton_open_parse = Button(parse_frame, text="PARSE",
+        bouton_open_parse = Button(parse_frame, text="PARSING OPTIONS",
                        command=open_parsing, fg="#4065A4", bg="white")
         bouton_open_parse.pack()
     
