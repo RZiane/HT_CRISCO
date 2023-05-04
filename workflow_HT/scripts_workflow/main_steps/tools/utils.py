@@ -605,7 +605,7 @@ def conversion_conllu2xml(inputfile, outputfile):
             parag = ET.Element("p", attrib={'n': para})
             sect = ET.Element("div", attrib={'type':section})
             chapitre = ET.Element("div", attrib={'type':'chapter', 'n': chapter})
-            livre = ET.Element("div", attrib={'type':'chapter', 'n':book})
+            livre = ET.Element("div", attrib={'type':'book', 'n':book})
             
             phrase.append(mot)
 
