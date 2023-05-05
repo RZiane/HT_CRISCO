@@ -16,7 +16,7 @@ path_PRESTO = "/home/ziane212/crisco_work_ressources/dico_PRESTO_SIMPLE_10.01.23
 path_CorrTable = "/home/ziane212/crisco_work_ressources/MICLE_CorrTable_13-02-23.csv"
 '''
 
-path_PRESTO = "C:/Users/yagam/Desktop/crisco_ressources/dico_PRESTO_SIMPLE_08.03.23.dff"
+path_PRESTO = "C:/Users/yagam/Desktop/crisco_ressources/dico_PRESTO_SIMPLE_05.05.23.dff"
 path_CorrTable = "C:/Users/yagam/Desktop/crisco_ressources/MICLE_CorrTable_27-02-23.csv"
 
 # gestion des conversions Upenn particulières, éditions des listes de lemmes et definition d'une fonction qui regroupe toutes les conditions
@@ -168,6 +168,19 @@ def process_conversion(inputfile, outputfile, d_CorrTable, d_PRESTO):
 
         # lecture des tokens
         s_token = w.text
+        if len(list(w))!=0:
+            if list(w)[0].tag == 'choice':
+                s_token = list(w)[0][1].text
+
+            else:
+
+                for child in w.iter():
+                    if child.text:
+                        s_token += child.text
+                    if child.tail:
+                        s_token += child.tail
+        else:
+            s_token = w.text
         
         # edit token (lower pour eviter les majuscules en début de phrase, rstrip pour éviter les points agglutinés sur le token)
         s_token = s_token.replace('[', '').replace('(', '').replace(']', '').replace(')', '').rstrip('-')
@@ -288,9 +301,13 @@ def process_conversion(inputfile, outputfile, d_CorrTable, d_PRESTO):
                 w.attrib['prpos'] = 'Ag'
 
             if s_udpos=='ADP':
+                if w.attrib['lemma'] == 'à+le' or w.attrib['lemma'] == 'de+le':
+                    #w.attrib['pr'] = 'PREP'
+                    w.attrib['prpos'] = 'S+Da'
+                else:
+                    #w.attrib['pr'] = 'PREP'
+                    w.attrib['prpos'] = 'S'
                 w.attrib['uppos'] = 'P'
-                #w.attrib['pr'] = 'PREP'
-                w.attrib['prpos'] = 'S'
 
             if s_udpos=='ADV':
                 w.attrib['uppos'] = 'ADV'

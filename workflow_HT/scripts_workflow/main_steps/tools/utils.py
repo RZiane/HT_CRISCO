@@ -473,13 +473,18 @@ def conversion_conllu2xml(inputfile, outputfile):
     data = ET.Element('text') 
 
     #Le premier enfant de chaque structure est "1"
-
+    '''
     book = "1"
     chapter = "1"
     section = "1"
     para = "1"
     sent = "1"
-
+    '''
+    book = "1"
+    chapter = "1"
+    section = "1"
+    para = "1"
+    sent = "1"
     #On construit les éléments.
 
     livre = ET.Element("div", attrib={'type':'book', 'n': book})
@@ -1030,30 +1035,116 @@ def resolv_ambi(inputfile, outputfile):
                         w.set('uppos', 'VPP')
                         w.set('prpos', 'Ge')
                     w.set('ambiguite', 'advcl')
-            '''
+            
             # acl
             if w.get('uppos') ==  'VPP///VJ' and w.get('function') ==  'acl':
                 
-                head_w = w.get('head')
-                id_w = w.get('n')
-
-                b_spot_child = False
+                id_parent = w.get('n')
 
                 for w2 in root.findall('.//s')[id_]:
 
-                    if w2.get('head') == id_w:
-                        b_spot_child = True
+                    if w2.get('head') == id_parent and w2.get('udpos') == 'AUX' and w2.get('lemma') in l_lemma_AUX:                
+                        w.set('uppos', 'VPP')
+                        w.set('prpos', 'Ge')
+                        w.set('ambiguite', 'acl')
+            
+            # Pr
+            if w.get('prpos') ==  'Pr///Pt' and s.findall('.//w')[len(s)-1].text =='?':
+                w.set('prpos', 'Pt')
+                w.set('ambiguite', "PronType")
+            elif w.get('prpos') ==  'Pr///Pt':
+                w.set('prpos', 'Pr')
+                w.set('ambiguite', "PronType")
+
+    indent_xml(root)
+
+    reorderAttrib(root)
+
+    ET.ElementTree(root).write(outputfile, encoding="utf-8")
+
+def annotNPL(inputfile, outputfile):
+
+    tree = ET.parse(open(inputfile, encoding="utf-8"))
+    root = tree.getroot()
+
+    l_numSG = ['un']
+
+    for id_, s in enumerate(root.findall('.//s')):
+        
+        for id_w, w in enumerate(s.findall('.//w')):
                 
-                if b_spot_child == True:
-                    w.set('uppos', 'VPP')
-                    w.set('prpos', 'Ge')
-                    w.set('ambiguite', 'acl')
+            if w.get('uppos') ==  'NCS' or w.get('uppos') ==  'NPRS':
+                id_gov = w.get('n')
                 
-                else:
+                for w2 in root.findall('.//s')[id_]:
+                    
+                    id_dep = w2.get('n')
+                    
+                    if w2.get('head') == id_gov and w2.get('function') == 'nummod' and id_gov > id_dep:
+                        
+                        if w.get('lemma') in l_numSG:
+                            pass
+                        else:
+                            if w.get('uppos') ==  'NCS':
+                                w.set('uppos', 'NCPL')
+                                w.set('annot_PL', "nummod")
+                            if w.get('uppos') ==  'NPRS':
+                                w.set('uppos', 'NPRPL')
+                                w.set('annot_PL', "nummod")                            
+                    
+                    if w2.get('head') == id_gov and w2.get('udpos')=='DET' and (w2.text.endswith('s') or w2.text.endswith('z') or w2.text.endswith('x')):                                                              
+                        if w.get('uppos') ==  'NCS':
+                            w.set('uppos', 'NCPL')
+                            w.set('annot_PL', "nummod")
+                        if w.get('uppos') ==  'NPRS':
+                            w.set('uppos', 'NPRPL')
+                            w.set('annot_PL', "nummod")
+
+                    if w2.get('head') == id_gov and (w2.attrib['lemma']=='à+le' or w2.attrib['lemma']=='de+le'):                                                              
+                        if w.get('uppos') ==  'NCS':
+                            w.set('uppos', 'NCPL')
+                            w.set('annot_PL', "nummod")
+                        if w.get('uppos') ==  'NPRS':
+                            w.set('uppos', 'NPRPL')
+                            w.set('annot_PL', "nummod")
+
+    indent_xml(root)
+
+    reorderAttrib(root)
+
+    ET.ElementTree(root).write(outputfile, encoding="utf-8")
+
+def convNoMatching(inputfile, outputfile):
+
+    tree = ET.parse(open(inputfile, encoding="utf-8"))
+    root = tree.getroot()
+
+    l_function_noConv = ['root', 'acl:relcl', 'advcl', 'acl']
+
+    for id_, s in enumerate(root.findall('.//s')):
+        
+        for id_w, w in enumerate(s.findall('.//w')):
+            
+            if w.get('uppos') ==  '_' and w.get('prpos') ==  '_' and w.get('function') in l_function_noConv and w.get('udpos')=='VERB':
+                id_parent = w.get('n')
+                
+                for w2 in root.findall('.//s')[id_]:
+
+                    var = False
+                    if w2.get('head') == id_parent and w2.get('udpos') == 'AUX':
+                                
+                        var = True
+                    
+                if var == False:
                     w.set('uppos', 'VJ')
                     w.set('prpos', 'Vvc')
-                    w.set('ambiguite', 'acl')
-            '''
+                
+                elif var == True:
+                    w.set('uppos', 'VPP')
+                    w.set('prpos', 'Ge')
+                    
+                w.set('convNoMatching', 'Yes')
+
     indent_xml(root)
 
     reorderAttrib(root)

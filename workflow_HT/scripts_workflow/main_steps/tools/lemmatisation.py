@@ -13,7 +13,7 @@ path_PRESTO = "/home/ziane212/crisco_work_ressources/dico_PRESTO_SIMPLE_10.01.23
 path_CorrTable = "/home/ziane212/crisco_work_ressources/MICLE_CorrTable_13-02-23.csv"
 '''
 
-path_PRESTO = "C:/Users/yagam/Desktop/crisco_ressources/dico_PRESTO_SIMPLE_08.03.23.dff"
+path_PRESTO = "C:/Users/yagam/Desktop/crisco_ressources/dico_PRESTO_SIMPLE_05.05.23.dff"
 path_CorrTable = "C:/Users/yagam/Desktop/crisco_ressources/MICLE_CorrTable_27-02-23.csv"
 
 def lemmatisation(entry, tag, list_prpos, list_prfeat, list_lemma):
