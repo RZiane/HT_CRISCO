@@ -167,7 +167,6 @@ def process_conversion(inputfile, outputfile, d_CorrTable, d_PRESTO):
     for w in tqdm(root.findall('.//w')):
 
         # lecture des tokens
-        s_token = w.text
         if len(list(w))!=0:
             if list(w)[0].tag == 'choice':
                 s_token = list(w)[0][1].text
