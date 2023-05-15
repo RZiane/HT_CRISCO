@@ -170,9 +170,7 @@ def process_conversion(inputfile, outputfile, d_CorrTable, d_PRESTO):
         if len(list(w))!=0:
             if list(w)[0].tag == 'choice':
                 s_token = list(w)[0][1].text
-
             else:
-
                 for child in w.iter():
                     if child.text:
                         s_token += child.text
