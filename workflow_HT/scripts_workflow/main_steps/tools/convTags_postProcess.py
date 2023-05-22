@@ -8,6 +8,6 @@ if __name__ == "__main__":
    inputfile, outputfile = def_args(sys.argv[1:])
    print('Post processing...')
    resolv_ambi(inputfile, outputfile)
-   convNoMatching(inputfile, outputfile)   
-   annotNPL(inputfile, outputfile)
+   convNoMatching(outputfile, outputfile)   
+   annotNPL(outputfile, outputfile)
    print('Post processing is done')       
