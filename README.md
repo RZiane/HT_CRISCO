@@ -18,6 +18,7 @@ H-T_CRISCO project contains scripts for the five phases of the workflow that sho
 There is also a “tools” folder that contains scripts for individual operations that are integrated into the main phases of the workflow but can be executed separately if needed. For example, the second phase of the workflow includes renumbering of the tokens in the XML file, conversion from XML to CONLLU format, execution of HOPS parser (that requires CONLLU), conversion from CONLLU back to XML and synchronisation with the original XML file, which are done using “tools” scripts.
 If you wish to use the Workflow locally on your machine it is therefore vital to download the whole project including the “tools” folder.
 
+![Workflow](https://drive.google.com/drive/folders/1T0-AwVyfD4ZBxmb4AYgwZcIXoyz7npL0)
 
 # Principles of the H-T Workflow
 H-T Workflow consists in five phases that allow to progress from a plain digitised text in TXT format to an XML file enriched with linguistic metadata.
