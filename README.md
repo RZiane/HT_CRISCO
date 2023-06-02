@@ -20,7 +20,7 @@ If you wish to use the Workflow locally on your machine it is therefore vital to
 
 ![Workflow](img/HT_workflow.png)
 
-# Principles of the H-T Workflow
+# Principles of the H-T Workflow:
 H-T Workflow consists in five phases that allow to progress from a plain digitised text in TXT format to an XML file enriched with linguistic metadata.
 Warning: Please note that the workflow was conceived for edited texts with punctuation and expanded abbreviations. It will require significant adaptation for diplomatic editions. Although it can work on verse text, the workflow cannot currently accommodate line structure annotated by <l> tags.
 The Workflow allows:
