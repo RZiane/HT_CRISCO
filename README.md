@@ -14,7 +14,7 @@ In order to use H-T workflow, you will need to install HOPS parser on your compu
 
 In addition, you will need to download Presto dictionary file that is used for [lemmatisation and tagset conversion](https://unicloud.unicaen.fr/index.php/s/YgfYJenQMKD8bEC) and the tagset conversion table(XXX). You can download the scripts from the GitHub project or execute them from the GitHub project using an environment such as [GitHub Desktop](https://desktop.github.com/)
 
-\* This a revised version of the dictionary produced as part of the [Presto project](http://presto.ens-lyon.fr/). See [Lay, M.H.& Pincemin B. (2010)](https://www.ledonline.it/ledonline/JADT-2010/allegati/JADT-2010-1045-1056_106-Lay.pdf).
+\* This a revised version of the dictionary produced as part of the [Presto project](http://presto.ens-lyon.fr/). See [Lay M.H.& Pincemin B. (2010)](https://www.ledonline.it/ledonline/JADT-2010/allegati/JADT-2010-1045-1056_106-Lay.pdf).
 
 # Structure of the GitHub project:
 H-T_CRISCO project contains scripts for the five phases of the workflow that should be executed separately as the work on each text of the corpus progresses.
