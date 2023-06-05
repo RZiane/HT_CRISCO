@@ -8,15 +8,16 @@ import requests
 def def_args(argv):
    inputfile = ''
    outputfile = ''
-   opts, args = getopt.getopt(argv,"hi:o:",["ifile=","ofile="])
+   opts, args = getopt.getopt(argv,"hi:o:",["ifile=","ofile=","tfile="])
    for opt, arg in opts:
-      if opt == '-h':
-         print ('test.py -i <inputfile> -o <outputfile>')
-         sys.exit()
-      elif opt in ("-i", "--ifile"):
-         inputfile = arg
-      elif opt in ("-o", "--ofile"):
-         outputfile = arg
+        if opt == '-h':
+            print ('test.py -i <inputfile> -o <outputfile>')
+            sys.exit()
+        elif opt in ("-i", "--ifile"):
+            inputfile = arg
+        elif opt in ("-o", "--ofile"):
+            outputfile = arg
+
    print ('Input file is ', inputfile)
    print ('Output file is ', outputfile)
 
@@ -725,7 +726,7 @@ def synchronisation_xml(functionw, xmlw, compil, option):
                             # On boucle sur les w
 
                         for word in sentence.findall('.//w'):
-                            #dev 
+                            #dev print(word.text)
                             word_nb = word.get('n')
                                 # On nomme les coordonnées de la phrase
 
@@ -790,6 +791,7 @@ def synchronisation_xml(functionw, xmlw, compil, option):
     #tree2.write(compil, xml_declaration=False, encoding="utf-8")
     
     #ET.dump(tree)
+    reorderAttrib(tree2)
     tree2.write(compil, pretty_print=True, encoding="utf-8")
 
 ### Lemmatisation/Conversion tagsets ##########################
