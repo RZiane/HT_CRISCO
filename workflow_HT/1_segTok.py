@@ -193,13 +193,13 @@ def extract_stats():
                 list_len_lg.append(i)
                 cnt_lg += 1
             
-    print('Nb_phrases_longues: '+ str(cnt_lg)+' sur un total de '+str(nb_sent)+' phrases' )
-    print("Après découpe au point-virgule dans les phrases trop longues: ")
-    print("\tmoyenne du total: ", statistics.mean(list_len))
-    print("\tmediane du total: ", statistics.median(list_len))
-    print("\tmoyenne des phrases trop longues: ", statistics.mean(list_len_lg))
-    print("\tmediane des phrases trop longues: ", statistics.median(list_len_lg))
-    print("\tmax des phrases trop longues: ", sorted(list_len_lg)[len(list_len_lg)-1])
+    print('Nb_longs_sentences: '+ str(cnt_lg)+' / total : '+str(nb_sent)+' sentences' )
+    #print("Après découpe au point-virgule dans les phrases trop longues: ")
+    print("\ttotal mean: ", statistics.mean(list_len))
+    print("\ttotal median: ", statistics.median(list_len))
+    print("\ttoo long sentences mean: ", statistics.mean(list_len_lg))
+    print("\ttoo long sentences median: ", statistics.median(list_len_lg))
+    print("\tmax size long sentence: ", sorted(list_len_lg)[len(list_len_lg)-1])
 
 def extract_lg_sents():
         

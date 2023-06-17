@@ -408,7 +408,7 @@ def conversion_conllu2xml(inputfile, outputfile):
             if 'sent_id' in line:
                 if len(sentence.keys()) != 0:
                     sentence = {}
-                
+                print(line)
                 sentence_str = re.search("\d+-\d+-\d+-\d+-\d+", line).group()
                 num2 = sentence_str.split('-')
                 '''
