@@ -2,14 +2,13 @@ from tkinter import *
 from tkinter import filedialog
 import re
 import xml.etree.ElementTree as ET
-import os
 import statistics
 from tools.utils import indent_xml
 from tools.utils import build_div
 from tools.utils import renum_xml
 
-os.system('Xvfb :1 -screen 0 1600x1200x16  &')    # create virtual display with size 1600x1200 and 16 bit color. Color can be changed to 24 or 8
-os.environ['DISPLAY']=':1.0'    # tell X clients to use our virtual DISPLAY :1.0
+# os.system('Xvfb :1 -screen 0 1600x1200x16  &')    # create virtual display with size 1600x1200 and 16 bit color. Color can be changed to 24 or 8
+# os.environ['DISPLAY']=':1.0'    # tell X clients to use our virtual DISPLAY :1.0
 
 def onClick_punct():
     CheckVar1, CheckVar2 = punct_settings()
@@ -195,11 +194,14 @@ def extract_stats():
             
     print('Nb_longs_sentences: '+ str(cnt_lg)+' / total : '+str(nb_sent)+' sentences' )
     #print("Après découpe au point-virgule dans les phrases trop longues: ")
-    print("\ttotal mean: ", statistics.mean(list_len))
-    print("\ttotal median: ", statistics.median(list_len))
-    print("\ttoo long sentences mean: ", statistics.mean(list_len_lg))
-    print("\ttoo long sentences median: ", statistics.median(list_len_lg))
-    print("\tmax size long sentence: ", sorted(list_len_lg)[len(list_len_lg)-1])
+    if cnt_lg != 0:
+        print("\ttotal mean: ", statistics.mean(list_len))
+        print("\ttotal median: ", statistics.median(list_len))
+        print("\ttoo long sentences mean: ", statistics.mean(list_len_lg))
+        print("\ttoo long sentences median: ", statistics.median(list_len_lg))
+        print("\tmax size long sentence: ", sorted(list_len_lg)[len(list_len_lg)-1])
+    else:
+        print('\tNo long sentences')
 
 def extract_lg_sents():
         
@@ -380,7 +382,6 @@ def saveFile():
 
         i = re.sub('  ', ' ', i)
         i = i.replace('...', '…')
-        #i = re.sub('\.\.\.', '…', i)
         i = re.sub(':', ' :', i)
         i = re.sub('\?', ' ?', i)
         i = re.sub('\!', ' !', i)
