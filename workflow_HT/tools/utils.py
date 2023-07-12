@@ -1,8 +1,10 @@
 import sys, getopt
-import xml.etree.ElementTree as ET
+# import xml.etree.ElementTree as ET
+from lxml import etree as ET
 import copy
 from tqdm import tqdm
 import re
+import sys   
 import requests
 
 def def_args(argv):
@@ -62,6 +64,14 @@ def reorderAttrib(root):
 
         if word.get('fiabilite')!=None:
             word.attrib['fiabilite'] = word.attrib.pop('fiabilite')
+        
+        if word.get('convNoMatching')!=None:
+            word.attrib['convNoMatching'] = word.attrib.pop('convNoMatching')
+        
+        if word.get('annot_PL')!=None:
+            word.attrib['annot_PL'] = word.attrib.pop('annot_PL')
+        
+
 
 def indent_xml(elem, level=0, more_sibs=False):
     i = "\n"
@@ -226,6 +236,58 @@ def renum_xml(inputfile, outputfile):
     indent_xml(root)
     reorderAttrib(root)
     ET.ElementTree(root).write(outputfile, encoding="utf-8")
+
+def valid_xml(inputfile, phase):
+
+    l_upos = ["ADJ","ADP","PUNCT","ADV",
+             "AUX","SYM","INTJ","CCONJ",
+             "X","NOUN","DET","PROPN",
+             "NUM","VERB","PART","PRON",
+             "SCONJ"]
+
+    
+    error_cnt = 0
+    with open(inputfile) as f:
+        for id_, line in enumerate(f):
+            line = line.lstrip('\t')
+            if line.startswith('<w'):
+                s_udpos_content = re.findall('udpos=\"([^\"]*)\"', line)
+                if phase == "lemma" or phase == "convTags":
+                    if s_udpos_content==[]:
+                        print('No udpos attribut inside the line: '+str(id_+1))
+                        print(line)
+                        error_cnt += 1
+                    try:
+                        if s_udpos_content[0] in l_upos:
+                            pass 
+                        else:
+                            print('Error in the POS class inside line: '+str(id_+1))
+                            print(line)
+                            error_cnt +=1
+                    except:
+                        pass
+
+                s_lemma_content = re.findall('lemma=\"([^\"]*)\"', line)
+                if phase == "convTags":
+                    if s_lemma_content==[]:
+                        print('No lemma attribut inside the line: '+str(id_+1))
+                        print(line)
+                        error_cnt += 1
+                    try:
+                        if s_lemma_content[0] != "_" and s_lemma_content[0] != "":
+                            pass
+                        elif s_lemma_content[0] == "_":
+                            print('Please check lemma attribut inside line: '+str(id_+1))
+                            print(line)
+                        elif s_lemma_content[0] == "":
+                            print('Empty lemma attribut inside line: '+str(id_+1))
+                            print(line)
+                            error_cnt +=1
+                    except:
+                        pass
+
+    if error_cnt !=0:
+        sys.exit("Error in XML file, see comment above.")    
 
 def conversion_xml2conllu(inputfile, outputfile):
     # On ouvre le fichier de sortie
@@ -849,7 +911,7 @@ def resolv_ambi(inputfile, outputfile):
     root = tree.getroot()
 
     l_function_AUX = ['aux', 'aux:pass', 'cop']
-    l_function_VERB = ['root', 'ccomp', 'acl:relcl', 'parataxis', 'conj']
+    l_function_VERB = ['root', 'ccomp', 'acl:relcl', 'parataxis']
     l_lemma_AUX = ['être', 'avoir']
 
     for id_, s in enumerate(root.findall('.//s')):
@@ -857,14 +919,13 @@ def resolv_ambi(inputfile, outputfile):
         for w in s.findall('.//w'):
             
             # classique
-            if (w.get('uppos') ==  'VPP///VJ' or w.get('uppos') ==  'EPP///EJ' or w.get('uppos') ==  'APP///AJ') and w.get('function')in l_function_VERB :
+            if (w.get('uppos') ==  'VPP///VJ' or w.get('uppos') ==  'EPP///EJ' or w.get('uppos') ==  'APP///AJ') and w.get('function') in l_function_VERB :
                 id_parent = w.get('n')
-                
+                var = False
                 for w2 in root.findall('.//s')[id_]:
-
-                    var = False
+                    
                     if w2.get('head') == id_parent and w2.get('udpos') == 'AUX':
-                                
+                        
                         var = True
                     
                     if w2.get('head') == id_parent and w2.get('udpos') == 'AUX' and w2.get('function') in l_function_AUX and w2.get('lemma') in l_lemma_AUX:
@@ -872,46 +933,45 @@ def resolv_ambi(inputfile, outputfile):
                         if w.get('uppos') ==  'VPP///VJ':
                             w.set('uppos', 'VPP')
                             w.set('prpos', 'Ge')
+                            w.set('ambiguite', 'standard1')
                         elif w.get('uppos') ==  'APP///AJ':
                             w.set('uppos', 'APP')
                             w.set('prpos', 'Ge')
+                            w.set('ambiguite', 'standard1')
                         elif w.get('uppos') ==  'EPP///EJ':
                             w.set('uppos', 'EPP')
                             w.set('prpos', 'Ge')
-                            
-                        w.set('ambiguite', 'standard')
+                            w.set('ambiguite', 'standard1')
                     
                 if var == False:
                     if w.get('uppos') ==  'VPP///VJ':
                         w.set('uppos', 'VJ')
                         w.set('prpos', 'Vvc')
+                        w.set('ambiguite', 'standard2')
                     elif w.get('uppos') ==  'APP///AJ':
                         w.set('uppos', 'AJ')
                         w.set('prpos', 'Vuc')
+                        w.set('ambiguite', 'standard2')
                     elif w.get('uppos') ==  'EPP///EJ':
                         w.set('uppos', 'EJ')
                         w.set('prpos', 'Vuc')
-
-                    w.set('ambiguite', 'standard')
-                    
-                    
+                        w.set('ambiguite', 'standard2')                    
             
             # doubles auxiliaires
             if w.get('uppos') ==  'APP///AJ' or w.get('uppos') ==  'EPP///EJ':
                 
-                head_parent = w.get('head')
+                id_parent = w.get('head')
                 function_w = w.get('function')
                 
                 for w2 in root.findall('.//s')[id_]:
-                    if w2.get('n') == head_parent:
-                        id_parent = w2.get('n')
+                    if w2.get('n') == id_parent:
                         udpos_parent = w2.get('udpos')
                         uppos_parent = w2.get('uppos')
                         
                         var = False
                         
                         for w3 in root.findall('.//s')[id_]:
-                            if w3.get('head') == id_parent and w3.get('udpos') == 'AUX' and w2.get('lemma') in l_lemma_AUX:
+                            if w3.get('head') == id_parent and w3.get('udpos') == 'AUX' and w3.get('lemma') in l_lemma_AUX:
                                 
                                 var = True
                                 
@@ -939,7 +999,7 @@ def resolv_ambi(inputfile, outputfile):
                                     if uppos_parent == 'VJ':
                                         w2.set('uppos', 'VPP')
                                         w2.set('prpos', 'Ge')
-                                        w2.set('ambiguite', 'standard')
+                                        w2.set('ambiguite', 'standard3')
                                 
                                 if w.get('ambiguite') == None:
                                     w.set('ambiguite', 'spe')
@@ -961,28 +1021,28 @@ def resolv_ambi(inputfile, outputfile):
                         
                         for w3 in root.findall('.//s')[id_]:
                             if w3.get('head') == id_parent and w3.get('udpos') == 'AUX' and w3.get('function') in l_function_AUX and w3.get('lemma') in l_lemma_AUX:                   
-                                if w2.get('lemma')=='être':
+                                if w.get('lemma')=='être':
                                     w.set('uppos', 'EPP')
                                     w.set('prpos', 'Ge')
-                                elif w2.get('lemma')=='avoir':
+                                elif w.get('lemma')=='avoir':
                                     w.set('uppos', 'APP')
                                     w.set('prpos', 'Ge')
                                 else:
                                     w.set('uppos', 'VPP')
                                     w.set('prpos', 'Ge')
-                                w.set('ambiguite', 'conj')
+                                w.set('ambiguite', 'conj1')
                     
                     elif w2.get('n') == head_parent and w2.get('udpos') == 'VERB' and (w2.get('uppos') == 'VJ' or w2.get('uppos') == 'EJ' or w2.get('uppos') == 'AJ') :
-                        if w2.get('lemma')=='être':
+                        if w.get('lemma')=='être':
                             w.set('uppos', 'EJ')
                             w.set('prpos', 'Vuc')
-                        elif w2.get('lemma')=='avoir':
+                        elif w.get('lemma')=='avoir':
                             w.set('uppos', 'AJ')
                             w.set('prpos', 'Vuc')
                         else:
                             w.set('uppos', 'VJ')
                             w.set('prpos', 'Vvc')
-                        w.set('ambiguite', 'conj')
+                        w.set('ambiguite', 'conj2')
 
             
             # xcomp
@@ -1001,12 +1061,12 @@ def resolv_ambi(inputfile, outputfile):
                 if b_spot_aux == False:
                     w.set('uppos', 'VX')
                     w.set('prpos', 'Vvn')
-                    w.set('ambiguite', 'xcomp')
+                    w.set('ambiguite', 'xcomp1')
                     
                 elif b_spot_aux == True:
                     w.set('uppos', 'VJ')
                     w.set('prpos', 'Vvc')
-                    w.set('ambiguite', 'xcomp')
+                    w.set('ambiguite', 'xcomp2')
 
             
             # advcl
@@ -1025,39 +1085,39 @@ def resolv_ambi(inputfile, outputfile):
                 if b_spot_aux == False:
                     w.set('uppos', 'VJ')
                     w.set('prpos', 'Vvc')
-                    w.set('ambiguite', 'advcl')
+                    w.set('ambiguite', 'advcl1')
                     
                 elif b_spot_aux == True:
-                    if w2.get('lemma')=='être':
+                    if w.get('lemma')=='être':
                         w.set('uppos', 'EPP')
                         w.set('prpos', 'Ge')
-                    elif w2.get('lemma')=='avoir':
+                    elif w.get('lemma')=='avoir':
                         w.set('uppos', 'APP')
                         w.set('prpos', 'Ge')
                     else:
                         w.set('uppos', 'VPP')
                         w.set('prpos', 'Ge')
-                    w.set('ambiguite', 'advcl')
+                    w.set('ambiguite', 'advcl2')
             
             # acl
-            if w.get('uppos') ==  'VPP///VJ' and w.get('function') ==  'acl':
+            # if w.get('uppos') ==  'VPP///VJ' and w.get('function') ==  'acl':
                 
-                id_parent = w.get('n')
+            #     id_parent = w.get('n')
 
-                for w2 in root.findall('.//s')[id_]:
+            #     for w2 in root.findall('.//s')[id_]:
 
-                    if w2.get('head') == id_parent and w2.get('udpos') == 'AUX' and w2.get('lemma') in l_lemma_AUX:                
-                        w.set('uppos', 'VPP')
-                        w.set('prpos', 'Ge')
-                        w.set('ambiguite', 'acl')
+            #         if w2.get('head') == id_parent and w2.get('udpos') == 'AUX' and w2.get('lemma') in l_lemma_AUX:                
+            #             w.set('uppos', 'VPP')
+            #             w.set('prpos', 'Ge')
+            #             w.set('ambiguite', 'acl')
             
             # Pr
-            if w.get('prpos') ==  'Pr///Pt' and s.findall('.//w')[len(s)-1].text =='?':
-                w.set('prpos', 'Pt')
-                w.set('ambiguite', "PronType")
-            elif w.get('prpos') ==  'Pr///Pt':
-                w.set('prpos', 'Pr')
-                w.set('ambiguite', "PronType")
+            # if w.get('prpos') ==  'Pr///Pt' and s.findall('.//w')[len(s)-1].text =='?':
+            #     w.set('prpos', 'Pt')
+            #     w.set('ambiguite', "PronType")
+            # elif w.get('prpos') ==  'Pr///Pt':
+            #     w.set('prpos', 'Pr')
+            #     w.set('ambiguite', "PronType")
 
     indent_xml(root)
 
@@ -1090,26 +1150,26 @@ def annotNPL(inputfile, outputfile):
                         else:
                             if w.get('uppos') ==  'NCS':
                                 w.set('uppos', 'NCPL')
-                                w.set('annot_PL', "nummod")
+                                w.set('annot_PL', "nummod1")
                             if w.get('uppos') ==  'NPRS':
                                 w.set('uppos', 'NPRPL')
-                                w.set('annot_PL', "nummod")                            
+                                w.set('annot_PL', "nummod1")                            
                     
                     if w2.get('head') == id_gov and w2.get('udpos')=='DET' and (w2.text.endswith('s') or w2.text.endswith('z') or w2.text.endswith('x')):                                                              
                         if w.get('uppos') ==  'NCS':
                             w.set('uppos', 'NCPL')
-                            w.set('annot_PL', "nummod")
+                            w.set('annot_PL', "nummod2")
                         if w.get('uppos') ==  'NPRS':
                             w.set('uppos', 'NPRPL')
-                            w.set('annot_PL', "nummod")
+                            w.set('annot_PL', "nummod2")
 
-                    if w2.get('head') == id_gov and (w2.attrib['lemma']=='à+le' or w2.attrib['lemma']=='de+le'):                                                              
+                    if w2.get('head') == id_gov and (w2.attrib['lemma']=='à+le' or w2.attrib['lemma']=='de+le') and (w2.text.endswith('s') or w2.text.endswith('z') or w2.text.endswith('x')):                                                              
                         if w.get('uppos') ==  'NCS':
                             w.set('uppos', 'NCPL')
-                            w.set('annot_PL', "nummod")
+                            w.set('annot_PL', "nummod3")
                         if w.get('uppos') ==  'NPRS':
                             w.set('uppos', 'NPRPL')
-                            w.set('annot_PL', "nummod")
+                            w.set('annot_PL', "nummod3")
 
     indent_xml(root)
 
@@ -1121,8 +1181,9 @@ def convNoMatching(inputfile, outputfile):
 
     tree = ET.parse(open(inputfile, encoding="utf-8"))
     root = tree.getroot()
-
-    l_function_noConv = ['root', 'acl:relcl', 'advcl', 'acl']
+    l_lemma_AUX = ['être', 'avoir']
+    l_MD = ["devoir", "pouvoir", "vouloir"]
+    l_function_noConv = ['root', 'acl:relcl', 'advcl', 'ccomp']
 
     for id_, s in enumerate(root.findall('.//s')):
         
@@ -1130,23 +1191,62 @@ def convNoMatching(inputfile, outputfile):
             
             if w.get('uppos') ==  '_' and w.get('prpos') ==  '_' and w.get('function') in l_function_noConv and w.get('udpos')=='VERB':
                 id_parent = w.get('n')
-                
-                for w2 in root.findall('.//s')[id_]:
 
-                    var = False
+                var = False
+                for w2 in root.findall('.//s')[id_]:
+                    
                     if w2.get('head') == id_parent and w2.get('udpos') == 'AUX':
-                                
                         var = True
+                        lemma_AUX = w2.get('lemma') 
                     
                 if var == False:
-                    w.set('uppos', 'VJ')
-                    w.set('prpos', 'Vvc')
+                    if w.get('function') == 'advcl':
+                        pass
+                    else:
+                        if w.get('lemma')=='être':
+                            w.set('uppos', 'EJ')
+                            w.set('prpos', 'Vuc')
+                        elif w.get('lemma')=='avoir':
+                            w.set('uppos', 'AJ')
+                            w.set('prpos', 'Vuc')
+                        elif w.get('lemma') in l_MD:
+                            w.set('uppos', 'MDJ')
+                            w.set('prpos', 'Vvc')
+                        else:
+                            w.set('uppos', 'VJ')
+                            w.set('prpos', 'Vvc')
+                        w.set('convNoMatching', '1')
                 
                 elif var == True:
-                    w.set('uppos', 'VPP')
-                    w.set('prpos', 'Ge')
+                    if lemma_AUX not in l_lemma_AUX:
+                        if w.get('lemma')=='être':
+                            w.set('uppos', 'EX')
+                            w.set('prpos', 'Vun')
+                        elif w.get('lemma')=='avoir':
+                            w.set('uppos', 'AX')
+                            w.set('prpos', 'Vun')
+                        elif w.get('lemma') in l_MD:
+                            w.set('uppos', 'MDX')
+                            w.set('prpos', 'Ge')
+                        else:
+                            w.set('uppos', 'VX')
+                            w.set('prpos', 'Vvn')
+                        w.set('convNoMatching', '2')
+                    else:
+                        if w.get('lemma')=='être':
+                            w.set('uppos', 'EPP')
+                            w.set('prpos', 'Ge')
+                        elif w.get('lemma')=='avoir':
+                            w.set('uppos', 'APP')
+                            w.set('prpos', 'Ge')
+                        elif w.get('lemma') in l_MD:
+                            w.set('uppos', 'MDPP')
+                            w.set('prpos', 'Ge')
+                        else:
+                            w.set('uppos', 'VPP')
+                            w.set('prpos', 'Ge')
                     
-                w.set('convNoMatching', 'Yes')
+                        w.set('convNoMatching', '3')
 
     indent_xml(root)
 
@@ -1154,6 +1254,4 @@ def convNoMatching(inputfile, outputfile):
 
     ET.ElementTree(root).write(outputfile, encoding="utf-8")
 
-
-### Segmentation ##############################################
 

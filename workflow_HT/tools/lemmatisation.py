@@ -1,10 +1,8 @@
-import xml.etree.ElementTree as ET
+#import xml.etree.ElementTree as ET
+from lxml import etree as ET
 import itertools
 import sys, getopt
-from utils import indent_xml
-from utils import def_args
-from utils import make_d_PRESTO
-from utils import make_d_CorrTable
+from utils import indent_xml, def_args, make_d_PRESTO, make_d_CorrTable, valid_xml
 
 from tqdm import tqdm
 import time,sys
@@ -51,7 +49,17 @@ def process_lemmatisation(inputfile, outputfile, d_CorrTable, d_PRESTO):
             s_token = w.text
         
         # edit token (lower pour eviter les majuscules en début de phrase, rstrip pour éviter les points agglutinés sur le token)
-        s_token = s_token.replace('[', '').replace('(', '').replace(']', '').replace(')', '').replace('\t', '').replace('\n', '').rstrip('-')
+        l_replace = [('[', ''), ('(', ''), 
+                    (']', ''), (')', ''), 
+                    ('\t', ''), ('\n', ''), 
+                    ('"', ''), ('«', ''), 
+                    ('»', '')]
+        
+        for r in l_replace:
+            s_token = s_token.replace(*r)
+        
+        s_token = s_token.rstrip('-')
+
         if s_token.endswith('.') and len(s_token)!=1:
             s_token = s_token.replace('.', '')
         
@@ -134,6 +142,7 @@ def process_lemmatisation(inputfile, outputfile, d_CorrTable, d_PRESTO):
 
 if __name__ == "__main__":
    inputfile, outputfile = def_args(sys.argv[1:])
+   valid_xml(inputfile, "lemma")
    d_CorrTable = make_d_CorrTable(path_CorrTable)
    print("Processing dictionnary...")   
    d_PRESTO = make_d_PRESTO(path_PRESTO)

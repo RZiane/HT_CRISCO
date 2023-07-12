@@ -1,12 +1,10 @@
-import xml.etree.ElementTree as ET
+#import xml.etree.ElementTree as ET
+from lxml import etree as ET
 import itertools
 import sys, getopt
 
-from utils import indent_xml
-from utils import renum_xml
-from utils import def_args
-from utils import make_d_PRESTO
-from utils import make_d_CorrTable
+from utils import indent_xml, renum_xml, def_args, make_d_PRESTO, make_d_CorrTable, valid_xml
+
 
 from tqdm import tqdm
 import time,sys
@@ -16,8 +14,8 @@ path_PRESTO = "/home/ziane212/crisco_work_ressources/dico_PRESTO_SIMPLE_10.01.23
 path_CorrTable = "/home/ziane212/crisco_work_ressources/MICLE_CorrTable_13-02-23.csv"
 '''
 
-path_PRESTO = "C:/Users/yagam/Desktop/crisco_ressources/dico_PRESTO_SIMPLE_05.05.23.dff"
-path_CorrTable = "C:/Users/yagam/Desktop/crisco_ressources/MICLE_CorrTable_27-02-23.csv"
+path_PRESTO = "/home/ziane212/projects/data/crisco/dico_PRESTO_SIMPLE_05.05.23.dff"
+path_CorrTable = "/home/ziane212/projects/data/crisco/MICLE_CorrTable_27-02-23.csv"
 
 # gestion des conversions Upenn particulières, éditions des listes de lemmes et definition d'une fonction qui regroupe toutes les conditions
 
@@ -165,6 +163,7 @@ def process_conversion(inputfile, outputfile, d_CorrTable, d_PRESTO):
     root = tree.getroot()
 
     for w in tqdm(root.findall('.//w')):
+        print(w.text)
 
         # lecture des tokens
         if len(list(w))!=0:
@@ -180,7 +179,17 @@ def process_conversion(inputfile, outputfile, d_CorrTable, d_PRESTO):
             s_token = w.text
         
         # edit token (lower pour eviter les majuscules en début de phrase, rstrip pour éviter les points agglutinés sur le token)
-        s_token = s_token.replace('[', '').replace('(', '').replace(']', '').replace(')', '').rstrip('-')
+        l_replace = [('[', ''), ('(', ''), 
+                    (']', ''), (')', ''), 
+                    ('\t', ''), ('\n', ''), 
+                    ('"', ''), ('«', ''), 
+                    ('»', '')]
+        
+        for r in l_replace:
+            s_token = s_token.replace(*r)
+        
+        s_token = s_token.rstrip('-')
+        
         if s_token.endswith('.') and len(s_token)!=1:
             s_token = s_token.replace('.', '')
         
@@ -364,7 +373,8 @@ def process_conversion(inputfile, outputfile, d_CorrTable, d_PRESTO):
 
 if __name__ == "__main__":
    inputfile, outputfile = def_args(sys.argv[1:])
-   global d_CorrTable
+   # global d_CorrTable
+   valid_xml(inputfile, "convTags")
    d_CorrTable = make_d_CorrTable(path_CorrTable)
    print("Processing dictionnary...")
    d_PRESTO = make_d_PRESTO(path_PRESTO)

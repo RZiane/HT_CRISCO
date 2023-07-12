@@ -1,7 +1,8 @@
 from tkinter import *
 from tkinter import filedialog
 import re
-import xml.etree.ElementTree as ET
+#import xml.etree.ElementTree as ET
+from lxml import etree as ET
 import statistics
 from tools.utils import indent_xml
 from tools.utils import build_div
