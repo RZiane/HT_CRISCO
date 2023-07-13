@@ -1,6 +1,5 @@
-import sys, getopt
-from utils import def_args
-from utils import synchronisation_xml
+import sys
+from utils import def_args,synchronisation_xml
                 
 if __name__ == "__main__":
     inputfile, tempfile, outputfile = def_args(sys.argv[1:])

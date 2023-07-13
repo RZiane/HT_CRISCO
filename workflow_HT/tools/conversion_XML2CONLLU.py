@@ -1,6 +1,5 @@
-import sys, getopt
-from utils import def_args
-from utils import conversion_xml2conllu
+import sys
+from utils import def_args, conversion_xml2conllu
                 
 if __name__ == "__main__":
     inputfile, outputfile = def_args(sys.argv[1:])

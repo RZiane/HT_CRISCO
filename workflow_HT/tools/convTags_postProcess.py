@@ -1,8 +1,5 @@
-import sys, getopt
-from utils import resolv_ambi
-from utils import convNoMatching
-from utils import annotNPL
-from utils import def_args
+import sys
+from utils import def_args, resolv_ambi,convNoMatching, annotNPL
 
 if __name__ == "__main__":
    inputfile, outputfile = def_args(sys.argv[1:])

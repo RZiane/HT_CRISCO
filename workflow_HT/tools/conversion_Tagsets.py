@@ -1,13 +1,7 @@
-#import xml.etree.ElementTree as ET
+import itertools, sys
 from lxml import etree as ET
-import itertools
-import sys, getopt
-
-from utils import indent_xml, renum_xml, def_args, make_d_PRESTO, make_d_CorrTable, valid_xml
-
-
+from utils import indent_xml, def_args, make_d_PRESTO, make_d_CorrTable, valid_xml, get_word_form, preprocess_word_form
 from tqdm import tqdm
-import time,sys
 
 '''
 path_PRESTO = "/home/ziane212/crisco_work_ressources/dico_PRESTO_SIMPLE_10.01.23.dff"
@@ -18,7 +12,6 @@ path_PRESTO = "/home/ziane212/projects/data/crisco/dico_PRESTO_SIMPLE_05.05.23.d
 path_CorrTable = "/home/ziane212/projects/data/crisco/MICLE_CorrTable_27-02-23.csv"
 
 # gestion des conversions Upenn particulières, éditions des listes de lemmes et definition d'une fonction qui regroupe toutes les conditions
-
 l_Q = ['ASSEZ', 
           'AUCUN', 
           'AUTANT', 
@@ -163,37 +156,13 @@ def process_conversion(inputfile, outputfile, d_CorrTable, d_PRESTO):
     root = tree.getroot()
 
     for w in tqdm(root.findall('.//w')):
-        print(w.text)
+        #dev print(w.text)
 
         # lecture des tokens
-        if len(list(w))!=0:
-            if list(w)[0].tag == 'choice':
-                s_token = list(w)[0][1].text
-            else:
-                for child in w.iter():
-                    if child.text:
-                        s_token += child.text
-                    if child.tail:
-                        s_token += child.tail
-        else:
-            s_token = w.text
+        s_token = get_word_form(w)
         
         # edit token (lower pour eviter les majuscules en début de phrase, rstrip pour éviter les points agglutinés sur le token)
-        l_replace = [('[', ''), ('(', ''), 
-                    (']', ''), (')', ''), 
-                    ('\t', ''), ('\n', ''), 
-                    ('"', ''), ('«', ''), 
-                    ('»', '')]
-        
-        for r in l_replace:
-            s_token = s_token.replace(*r)
-        
-        s_token = s_token.rstrip('-')
-        
-        if s_token.endswith('.') and len(s_token)!=1:
-            s_token = s_token.replace('.', '')
-        
-        s_token = s_token.lower()
+        s_token = preprocess_word_form(s_token)
 
         # edit lemme
         s_lemma = w.get('lemma')

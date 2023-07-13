@@ -1,5 +1,5 @@
-import sys, getopt
-import xml.etree.ElementTree as ET
+import sys
+from lxml import etree as ET
 from utils import def_args
    
 def extract_lg(inputfile, outputfile):

@@ -1,11 +1,6 @@
-import sys, getopt
-# import xml.etree.ElementTree as ET
+import sys, getopt, copy, re
 from lxml import etree as ET
-import copy
 from tqdm import tqdm
-import re
-import sys   
-import requests
 
 def def_args(argv):
    inputfile = ''
@@ -141,6 +136,137 @@ def build_div(root, div_type):
     
     return root
 
+def get_word_form(w):
+     # lecture des tokens
+    if len(list(w))!=0:
+        if list(w)[0].tag == 'choice':
+            s_token = list(w)[0][1].text
+        else:
+            s_token = ''
+            for child in w.iter():
+                if child.text:
+                    s_token += child.text
+                if child.tail:
+                    s_token += child.tail
+    else:
+        s_token = w.text
+    
+    s_token = s_token.replace('\t', '').replace('\n', '')
+
+    return s_token
+
+def preprocess_word_form(s_token):
+    l_replace = [('[', ''), ('(', ''), 
+                    (']', ''), (')', ''), 
+                    ('\t', ''), ('\n', ''), 
+                    ('"', ''), ('«', ''), 
+                    ('»', '')]
+        
+    for r in l_replace:
+        s_token = s_token.replace(*r)
+    
+    s_token = s_token.rstrip('-')
+
+    if s_token.endswith('.') and len(s_token)!=1:
+        s_token = s_token.replace('.', '')
+    
+    s_token = s_token.lower()
+
+    return s_token
+
+def actu_list(list_, var):
+        find = False
+
+        for i, tpl in enumerate(list_):
+            if tpl[0] == var:
+                list_[i] = [tpl[0], tpl[1] + 1]
+                find = True
+                break
+
+        if not find:
+            list_.append([var, 1])
+
+def make_table_from_xml(inputfile, outputfile):
+
+    UPOS_select = input("Add UPOS to table (y or n): ") 
+    UPENN_POS_select = input("Add UPENN_POS to table (y or n): ")
+    PRESTO_POS_select = input("Add PRESTO_POS to table (y or n): ")
+    lemma_select = input("Add lemma to table (y or n): ")
+    function_select = input("Add function to table (y or n): ")
+
+    tree = ET.parse(open(inputfile, encoding="utf-8"))
+    root = tree.getroot()
+
+    list_ = []
+    list_.append(['', 0])
+
+    for id_, token in enumerate(root.findall('.//w')):
+        
+        #dev print(token.text)
+        form = get_word_form(token)
+        
+        try:
+            UPOS = token.get('udpos')
+        except:
+            UPOS = "_"
+        
+        try:
+            UPENN_POS = token.get('uppos')
+        except:
+            UPENN_POS = "_"
+        
+        try:
+            PRESTO_POS = token.get('prpos')
+        except:
+            PRESTO_POS = "_"
+        
+        try:
+            lemma = token.get('lemma')
+        except:
+            lemma = "_"
+        
+        try:
+            lemma_AND = token.get('lemma_AND')
+        except:
+            lemma_AND = "_"
+        try:
+            lemma_src = token.get('lemma_src')
+        except:
+            lemma_src = "_"
+        
+        try:
+            function = token.get('function')
+        except:
+            function = "_"
+        
+        ele = [form]
+        if UPOS_select == 'y':
+            ele.append(UPOS)
+        if UPENN_POS_select == 'y':
+            ele.append(UPENN_POS)
+        if PRESTO_POS_select == 'y':
+            ele.append(PRESTO_POS)
+        if lemma_select == 'y':
+            ele.append(lemma)
+        if function_select == 'y':
+            ele.append(function)
+
+        actu_list(list_, '\t'.join(ele))
+
+    for i in list_:
+        if i[1]==0:
+            list_.remove(i)
+    
+    print(list_)
+    for id_, i in enumerate(list_):
+        i[1] = str(i[1])
+        list_[id_] = '\t'.join(i)
+    list_ = list(sorted(set(list_)))       
+
+    with open(outputfile, "w", encoding='utf-8') as file:
+        for i in list_:
+            file.write(i.rstrip('\n')+'\n')
+
 def renum_xml(inputfile, outputfile):
     
     """
@@ -158,8 +284,6 @@ def renum_xml(inputfile, outputfile):
     En l'absence de namesplace, on travaille uniquement en-dehors du TEI.
     
     """
-
-    import xml.etree.ElementTree as ET
     
     # On importe le XML-TEI d'entrée et on le lit.
     tree = ET.parse(open(inputfile, encoding="utf-8"))
@@ -425,20 +549,7 @@ def conversion_xml2conllu(inputfile, outputfile):
 
                                 #On récupère le mot-forme. S'il y a des enfants, on concatène.
 
-                                form = ""
-                                if len(list(word))!=0:
-                                    if list(word)[0].tag == 'choice':
-                                        form = list(word)[0][1].text
-
-                                    else:
-
-                                        for child in word.iter():
-                                            if child.text:
-                                                form += child.text
-                                            if child.tail:
-                                                form += child.tail
-                                else:
-                                    form = word.text
+                                form = get_word_form(word)
                                 #dev print(form)
                                 mot = word_nb+"\t"+form.replace("\t", "").replace("\n", "")+"\t"+lemma+"\t"+udpos+"\t"+uppos+"\t_\t"+head+"\t"+function+"\t_\tjoin="+join+"|prpos="+prpos+"\n"          
 
