@@ -31,12 +31,12 @@ The Workflow allows:
 2. to enrich the text at token level with PoS information, lemmatisation, syntactic function and dependency annotation
 
 At each phase of the Workflow, the text will be enriched with the following metadata :
-1. Phase 1: text broken segmented into books, chapters, sections and paragraphs element <div>, attributes section=“book” or “chapter” or “section”). Within the paragraph, text is segmented into sentences (\<s> element) and tokens (\<w> element). Each book, chapter, section, paragraph, sentence and token are numbered (attribute n).
+1. Phase 1: text segmented into books, chapters, sections and paragraphs element <div>, attributes section=“book” or “chapter” or “section”). Within the paragraph, text is segmented into sentences (\<s> element) and tokens (\<w> element). Each book, chapter, section, paragraph, sentence and token are numbered (attribute n).
 
 \<w n="3">appellez\</w>
 
 
-From Phase 1, metadata is added at token level, although the structure and limits of books, chapters, sections, paragraphs, sentences and tokens can be altered manually at any stage.
+In Phase 1, metadata is added at token level, although the structure and limits of books, chapters, sections, paragraphs, sentences and tokens can be altered manually at any stage.
 
 
 2. Syntactic function and the reference to the parent token in the sentence (in the UD system) as well as the UD part of speech* are added (attributes udpos). 
