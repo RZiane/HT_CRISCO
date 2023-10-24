@@ -36,7 +36,7 @@ At each phase of the Workflow, the text will be enriched with the following meta
 \<w n="3">appellez\</w>
 
 
-In Phase 1, metadata is added at token level, although the structure and limits of books, chapters, sections, paragraphs, sentences and tokens can be altered manually at any stage.
+In Phase 1 [read more about Phase one in the Wiki](https://github.com/RZiane/HT_CRISCO/wiki/Phase-1:-Sentence-Segmentation-and-Tokenisation), metadata is added at token level, although the structure and limits of books, chapters, sections, paragraphs, sentences and tokens can be altered manually at any stage.
 
 
 2. Syntactic function and the reference to the parent token in the sentence (in the UD system) as well as the UD part of speech* are added (attributes udpos). 
