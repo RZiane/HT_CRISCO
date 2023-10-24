@@ -8,7 +8,9 @@ H-T workflow is centred around the use of the [HOPS parser](https://github.com/h
 
 \*\*Funded by Agence Nationale de Recherche (ANR) and Deutsche Forschungsgemeinschaft (DFG) for the period between June 2021-May 2024, MICLE project is constructing a calibrated corpus of legal texts in French from Normandy and the British Isles, on the one hand, and a parallel corpus in Venetian, on the other.
 
-\*\*\*Datasets will be made available in Autumn-Winter 2023 for High-Tech and in Summer 2024 for MICLE project.
+\*\*\*Datasets will be made available in January 2024 for High-Tech and in Summer 2024 for MICLE project.
+
+To learn more about the project, its annotation programme and the ways to explore the corpora, please watch the lecture by Rayan Ziane [Présentation du projet High-Tech](https://www.canal-u.tv/chaines/la-forge-numerique/presentation-du-projet-high-tech) (12 october 2023, CRISCO Lab, Caen University, France)
 
 # Requirements:
 In order to use H-T workflow, you will need to install HOPS parser on your computer by following instructions on the [project's GitHub page](https://github.com/hopsparser/hopsparser) and download the [SRCMF model](https://zenodo.org/record/6542539).
