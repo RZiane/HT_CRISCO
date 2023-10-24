@@ -66,3 +66,28 @@ In Phase 3, lemma is added (attribute lemma) wherever possible, a modern French 
 
 
 *For the attributes used for the parts of speech in Universal Dependencies, UPenn and Presto systems, see the Conversion table. 
+
+# References
+
+Blumenthal, P., Diwersy, S., Falaise, A., Lay, H., Souvay, G., Vigier, D., Descartes, P. R., Nancy, U., & de Lyon, U. (2017). Presto, un corpus diachronique pour le français des XVIe-XXe siècles.
+
+de Marneffe, M.-C., Manning, C. D., Nivre, J., & Zeman, D. (2021). Universal Dependencies. Computational Linguistics, 47(2), 255-308. https://doi.org/10.1162/coli_a_00402
+
+DeRose, S. (1999). XML and the TEI. Computers and the Humanities, 33(1), 11-30. https://doi.org/10.1023/A:1001771114509
+
+Goux, M. & Pinzin F. Challenges of a Multilingual Corpus (Old French/Old Venetian): The Example of the MICLE project. Venise et la France. Similitudes, spécificités, interrelations. Castro E., Della Fontana A. and 
+Pezzini E. Franco Cesati (ed) Florence : Cesati Editore (sous presse).
+
+Grobol, L., & Crabbé, B. (2021). Analyse en dépendances du français avec des plongements contextualisés (French dependency parsing with contextualized embeddings). Actes de la 28e Conférence sur le Traitement Automatique des Langues Naturelles. Volume 1 : conférence principale, 106-114. https://aclanthology.org/2021.jeptalnrecital-taln.9
+
+Lay, M.-H. & Pincemin, B. (2010). Pour une exploration humaniste des textes : AnaLog. Statistical Analysis of Textual Data: Proceedings of 10th International Conference Journée d’Analyse statistique des Données Textuelles 9-11 Juin 2010 – Sapienza University of Rome. Bolasco, S., Chiari I. & Giuliano L. (eds) V.2, 1045-1056 https://www.ledonline.it/ledonline/JADT-2010/allegati/JADT-2010-1045-1056_106-Lay.pdf
+
+Miletic A., Fabre C. & Stosic D. (2018). De la constitution d'un corpus arboré à l'analyse syntaxique du serbe. Revue TAL : traitement automatique des langues,.59 (3). pp.15-39. ⟨hal-02007248⟩
+
+Morcos, H., Noël, G. & Husar, M. Lemmatization in the collaborative editorial workflow of a medieval French text: The digital edition of the Ancient History jusqu’à César. Digital Scholarship in the Humanities, 36(2), 203-209. https://doi.org/10.1093/llc/fqaa060
+
+Santorini, B. (2007) Protocole d'étiquetage - Parties du discours (PDD).
+https://www.ling.upenn.edu/~beatrice/corpus-ling/annotation-french/pos/pos-index.html
+
+Peng Z., Gerdes K. & Guiller K. (2022). Pull your treebank up by its own bootstraps. Journées Jointes des Groupements de Recherche Linguistique Informatique, Formelle et de Terrain (LIFT) et Traitement Automatique des Langues (TAL), Nov 2022, Marseille, France. pp.139-153. ⟨hal-03846834⟩
+
