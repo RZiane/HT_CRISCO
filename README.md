@@ -10,7 +10,7 @@ H-T workflow is centred around the use of the [HOPS parser](https://github.com/h
 \*\*\*Datasets will be made available in Autumn-Winter 2023 for High-Tech and in Summer 2024 for MICLE project.
 
 # Requirements:
-In order to use H-T workflow, you will need to install HOPS parser on your computer by following instructions on the [project's GitHub page](https://github.com/hopsparser/hopsparser) and download [UD_Old_French-SRCMF-2.9-flaubert_base_cased+mlm-fro model](https://zenodo.org/record/6542539).
+In order to use H-T workflow, you will need to install HOPS parser on your computer by following instructions on the [project's GitHub page](https://github.com/hopsparser/hopsparser) and download the [SRCMF model](https://zenodo.org/record/6542539).
 
 In addition, you will need to download Presto dictionary file ([original](https://unicloud.unicaen.fr/index.php/s/NSkPrcaZ3Rx2t9P) or [revised](https://unicloud.unicaen.fr/index.php/s/YgfYJenQMKD8bEC) versions)\* that is used for lemmatisation and tagset conversion and the [tagset conversion table](https://unicloud.unicaen.fr/index.php/s/CAdFCbGgGKFHrai). You can download the scripts from the GitHub project or execute them from the GitHub project using an environment such as [GitHub Desktop](https://desktop.github.com/)
 
