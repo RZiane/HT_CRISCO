@@ -20,8 +20,8 @@ In addition, you will need to download Presto dictionary file ([original](https:
 \* Versions of the dictionary produced as part of the [Presto project](http://presto.ens-lyon.fr/). See [Lay M.H.& Pincemin B. (2010)](https://www.ledonline.it/ledonline/JADT-2010/allegati/JADT-2010-1045-1056_106-Lay.pdf).
 
 # Structure of the GitHub project:
-H-T_CRISCO project contains scripts for the five phases of the workflow that should be executed separately as the work on each text of the corpus progresses.
-There is also a “tools” folder that contains scripts for individual operations that are integrated into the main phases of the workflow but can be executed separately if needed. For example, the second phase of the workflow includes renumbering of the tokens in the XML file, conversion from XML to CONLLU format, execution of HOPS parser (that requires CONLLU), conversion from CONLLU back to XML and synchronisation with the original XML file, which are done using “tools” scripts.
+[H-T_CRISCO project](https://github.com/RZiane/HT_CRISCO/tree/main/workflow_HT) contains scripts for the five phases of the workflow that should be executed separately as the work on each text of the corpus progresses.
+There is also a [tools](https://github.com/RZiane/HT_CRISCO/tree/main/workflow_HT/tools) folder that contains scripts for individual operations that are integrated into the main phases of the workflow but can be executed separately if needed. For example, the second phase of the workflow includes renumbering of the tokens in the XML file, conversion from XML to CONLLU format, execution of HOPS parser (that requires CONLLU), conversion from CONLLU back to XML and synchronisation with the original XML file, which are done using “tools” scripts.
 If you wish to use the Workflow locally on your machine it is therefore vital to download the whole project including the “tools” folder.
 
 ![Workflow](img/HT_workflow.png)
