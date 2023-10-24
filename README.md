@@ -50,14 +50,14 @@ In Phase 2, syntactic function and the reference to the parent token in the sent
 
 In Phase 3, lemma is added (attribute lemma) wherever possible, a modern French lemma or a lemma from the [Dictionnaire du Moyen Français](http://zeus.atilf.fr/dmf/) is used
 
-[read more about Phase 2 in the Wiki]()
+[read more about Phase 3 in the Wiki]()
 
 \<w join="_" n="3" head="0" function="root" lemma="appeler" udpos="VERB" >appellez\</w>
 
 
 4. Attributes uppos (for the UPenn system of PoS annotation) and prpos (for the Presto system) are added)
 
-[read more about Phase 2 in the Wiki]()
+[read more about Phase 4 in the Wiki]()
 
 \<w join="_" n="3" head="0" function="root" lemma="appeler" udpos="VERB" prpos="Ge" uppos="VPP">appellez\</w>
 
