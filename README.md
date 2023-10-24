@@ -57,7 +57,7 @@ In Phase 3, lemma is added (attribute lemma) wherever possible, a modern French 
 
 4. Attributes uppos (for the UPenn system of PoS annotation) and prpos (for the Presto system) are added)
 
-[read more about Phase 4 in the Wiki]()
+[read more about Phase 4 in the Wiki](https://github.com/RZiane/HT_CRISCO/wiki/Phase-4:-Tagset-conversion-(UPenn,-Presto))
 
 \<w join="_" n="3" head="0" function="root" lemma="appeler" udpos="VERB" prpos="Ge" uppos="VPP">appellez\</w>
 
