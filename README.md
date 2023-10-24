@@ -53,7 +53,7 @@ In Phase 2, syntactic function and the reference to the parent token in the sent
 
 In Phase 3, lemma is added (attribute lemma) wherever possible, a modern French lemma or a lemma from the [Dictionnaire du Moyen Français](http://zeus.atilf.fr/dmf/) is used
 
-[read more about Phase 3 in the Wiki](https://github.com/RZiane/HT_CRISCO/wiki/Phase-3:-Lemmatisation-(Presto-dictionary)
+[read more about Phase 3 in the Wiki](https://github.com/RZiane/HT_CRISCO/wiki/Phase-3:-Lemmatisation Presto-dictionary)
 
 \<w join="_" n="3" head="0" function="root" lemma="appeler" udpos="VERB" >appellez\</w>
 
