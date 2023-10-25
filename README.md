@@ -47,7 +47,7 @@ Metadata is added at token level, although the structure and limits of books, ch
 
 In Phase 2, syntactic function and the reference to the parent token in the sentence (in the UD system) as well as the UD part of speech* are added (attributes udpos). 
 
-[read more about Phase 2 in the Wiki](https://github.com/RZiane/HT_CRISCO/wiki/Phase-2:-PoS-tagging-and-sentence-parsing-using-HOPS-parser](https://github.com/RZiane/HT_CRISCO/wiki/Phase-2:-PoS-tagging-and-sentence-parsing-using-HOPS-parser)
+[read more about Phase 2 in the Wiki](https://github.com/RZiane/HT_CRISCO/wiki/Phase-2:-PoS-tagging-and-sentence-parsing-using-HOPS-parser)
 
 \<w join="_" n="3" head="0" function="root" udpos="VERB" >appellez\</w>
 
