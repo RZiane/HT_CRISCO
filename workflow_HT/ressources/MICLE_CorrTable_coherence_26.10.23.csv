@@ -1,0 +1,86 @@
+﻿Classe,Presto_POS,PRESTO,UPENN,UPOS,AND
+adjectif possessif,ADJ,As,ADJZ,ADJ,a
+adjectif qualificatif,ADJ,Ag,ADJ,ADJ,a
+adjectif qualificatif,ADJ,Ag,Q,ADJ,a
+adjectif superlatif,ADJ,Ag,ADJS,ADJ,a
+adjectif superlatif,ADJ,Ag,ADJR,ADJ,a
+adverbe comparatif,ADV,Rg,ADVR,ADV,adv
+adverbe interrogatif/relatif et exclamatif,ADV,Rt,WADV,ADV,adv
+adverbe négatif,ADV,Rp,ADVNEG,ADV,adv
+adverbe superlatif,ADV,Rg,ADVS,ADV,adv
+adverbe négation NE,ADV,Rp,NEG,ADV,adv
+adverbe (autre),ADV,Rg,ADV,ADV,adv
+adverbe (autre),ADV,Rg,WH,ADV,adv
+adverbe (autre),ADV,Rg,Q,ADV,adv
+adverbe (autre),ADV,Rg,QR,ADV,adv
+auxiliaire AVOIR à l'infinitif,VER,Vun,AX,AUX,v
+verbe AVOIR à l'infinitif,VER,Vun,AX,VERB,v
+auxiliaire AVOIR au gérondif,PAG,Ga,AG,AUX,v
+verbe AVOIR au gérondif,PAG,Ga,AG,VERB,v
+auxiliaire AVOIR au participe passé,PAG,Ge,APP,AUX,v
+verbe AVOIR au participe passé,PAG,Ge,APP,VERB,v
+auxiliaire AVOIR conjugué,VER,Vuc,AJ,AUX,v
+verbe AVOIR conjugué,VER,Vuc,AJ,VERB,v
+auxiliaire ÊTRE à l'infinitif,VER,Vun,EX,AUX,v
+verbe ÊTRE à l'infinitif,VER,Vun,EX,VERB,v
+auxiliaire ÊTRE au gérondif,PAG,Ga,EG,AUX,v
+verbe ÊTRE au gérondif,PAG,Ga,EG,VERB,v
+auxiliaire ÊTRE au participe passé,PAG,Ge,EPP,AUX,v
+verbe ÊTRE au participe passé,PAG,Ge,EPP,VERB,v
+auxiliaire ÊTRE conjugué,VER,Vuc,EJ,AUX,v
+verbe ÊTRE conjugué,VER,Vuc,EJ,VERB,v
+conjonction de coordination,CON,Cc,CONJO,CCONJ,conj
+conjonction de coordination,CON,Cc,WH,CCONJ,conj
+conjonction de subordination,CON,Cs,CONJS,SCONJ,conj
+conjonction de subordination,CON,Cs,WH,SCONJ,conj
+déterminant défini (article défini),DET,Da,D,DET,art
+déterminant indéfini (article indéfini),DET,Dn,D,DET,art
+déterminant indéfini (autre),DET,Di,D,DET,art
+déterminant démonstratif,DET,Dd,D,DET,art
+déterminant partitif,DET,Dp,D,DET,art
+déterminant interrogatif/exclamatif,DET,Dt,WD,DET,art
+déterminant relatif,DET,Dr,WD,DET,art
+déterminant possessif,DET,Ds,DZ,DET,art
+déterminant indéfini (article indéfini),DET,Dn,Q,DET,art
+déterminant indéfini (autre),DET,Di,Q,DET,art
+nom commun au pluriel,NOM,Nc,NCPL,NOUN,s
+nom commun au pluriel,NOM,Nc,QR,NOUN,s
+nom commun au pluriel,NOM,Nc,Q,NOUN,s
+nom commun au singulier,NOM,Nc,NCS,NOUN,s
+nom propre au pluriel,NOMP,Np,NPRPL,PROPN,s
+nom propre au singulier,NOMP,Np,NPRS,PROPN,s
+Numéral,NUM,Mc,NUM,NUM,num
+Numéral,NUM,Mo,NUM,NUM,num
+Numéral,NUM,Mo,ADJNUM,NUM,num
+Numéral,NUM,Mc,ADJNUM,NUM,num
+préposition et déterminant défini contractés,PREP+DET,S+Da,P,ADP,prep
+préposition et déterminant relatif contractés,PREP+DET,S+Dr,P,ADP,prep
+préposition et pronom relatif contractés,PREP+PRO,S+Pr,P,ADP,prep
+préposition et pronom relatif contractés,PREP+PRO,S+Di,P,ADP,prep
+préposition et pronom relatif contractés,PREP+PRO,S+Dn,P,ADP,prep
+préposition,PREP,S,P,ADP,prep
+pronom interrogatif/exclamatif,PRO,Pt,WPRO,PRON,pron
+pronom relatif ,PRO,Pr,WPRO,PRON,pron
+pronom personnel,PRO,Pp,PRO,PRON,pron
+pronom démonstratif,PRO,Pd,PRO,PRON,pron
+pronom indéfini (autre),PRO,Pi,PRO,PRON,pron
+pronom indéfini (autre),PRO,Pi,Q,PRON,pron
+pronom indéfini (autre),PRO,Pi,WPRO,PRON,pron
+pronom possessif,PRO,Ps,PRO,PRON,pron
+verbe semi-auxiliaire* à l'infinitif (emploi non-modal**),VER,Vvn,MDX,VERB,v
+verbe semi-auxiliaire* à l'infinitif (emploi modal***),VER,Vvn,MDX,AUX,v
+verbe semi-auxiliaire* au gérondif (emploi non-modal**),PAG,Ga,MDG,VERB,v
+verbe semi-auxiliaire* au gérondif (emploi modal***),PAG,Ga,MDG,AUX,v
+verbe semi-auxiliaire* au participe passé (emploi non-modal**),PAG,Ge,MDPP,VERB,v
+verbe semi-auxiliaire* au participe passé (emploi modal***),PAG,Ge,MDPP,AUX,v
+verbe semi-auxiliaire* conjugué (emploi non-modal**),VER,Vvc,MDJ,VERB,v
+verbe semi-auxiliaire* conjugué (emploi modal***),VER,Vvc,MDJ,AUX,v
+verbe principal à l'infinitif,VER,Vvn,VX,VERB,v
+verbe principal au gérondif,PAG,Ga,VG,VERB,v
+verbe principal au participe passé,PAG,Ge,VPP,VERB,v
+verbe principal conjugué,VER,Vvc,VJ,VERB,v
+Foreign word,_,Xe,FW,X,_
+Interjection,INT,INT,ITJ,INTJ,interj
+ponctuation à la fin de la proposition,PUNC,Fs,PONFP,PUNCT,_
+ponctuation au milieu de la proposition,PUNC,Fw,PON,PUNCT,_
+parties du discours difficiles à interpréter,RES,Xa,X,X,_

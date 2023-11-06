@@ -1,6 +1,8 @@
-import sys, getopt, copy, re
+import sys, getopt, copy, re, os
 from lxml import etree as ET
 from tqdm import tqdm
+
+ns_map = {'tei': 'http://www.tei-c.org/ns/1.0'}
 
 def def_args(argv):
    inputfile = ''
@@ -19,6 +21,13 @@ def def_args(argv):
    print ('Output file is ', outputfile)
 
    return inputfile, outputfile
+
+def traverse_dir(repertoire):
+    for racine, dossiers, fichiers in os.walk(repertoire):
+        for fichier in fichiers:
+            if fichier.endswith(".xml"):
+                chemin_fichier = os.path.join(racine, fichier)
+                yield chemin_fichier
 
 ### XML processing ##############################################
 def reorderAttrib(root):
@@ -92,6 +101,20 @@ def indent_xml(elem, level=0, more_sibs=False):
             if more_sibs:
                 elem.tail += '\t'
 
+def drop_head(inputfile, outputfile):
+
+    tree = ET.parse(open(inputfile, encoding="utf-8"))
+    root = tree.getroot()
+
+    for token in tree.findall('.//w'):
+        token.set('head', '0')
+
+    indent_xml(root)
+
+    reorderAttrib(root)
+
+    ET.ElementTree(root).write(outputfile, encoding="utf-8")
+
 def build_div(root, div_type):
     
     type_ = str(div_type)
@@ -155,6 +178,25 @@ def get_word_form(w):
 
     return s_token
 
+def format_tag_text(root):
+    for w in root.findall(".//w"):
+        if len(list(w))!=0:
+            if list(w)[0].tag == 'choice':
+                list(w)[0][1].text = list(w)[0][1].text.replace('\t', '').replace('\n', '').rstrip(' ').lstrip(' ')
+                list(w)[0][0].text = list(w)[0][0].text.replace('\t', '').replace('\n', '').rstrip(' ').lstrip(' ')
+            else:
+                for child in w.iter():
+                    if child.text:
+                        child.text = child.text.replace('\t', '').replace('\n', '').rstrip(' ').lstrip(' ')
+                    if child.tail:
+                        child.tail = child.tail.replace('\t', '').replace('\n', '').rstrip(' ').lstrip(' ')
+        else:
+            try:
+                w.text = w.text.replace('\t', '').replace('\n', '').rstrip(' ').lstrip(' ')
+                w.tail = w.tail.replace('\t', '').replace('\n', '').rstrip(' ').lstrip(' ')
+            except AttributeError:
+                pass
+        
 def preprocess_word_form(s_token):
     l_replace = [('[', ''), ('(', ''), 
                     (']', ''), (')', ''), 
@@ -229,6 +271,7 @@ def make_table_from_xml(inputfile, outputfile):
             lemma_AND = token.get('lemma_AND')
         except:
             lemma_AND = "_"
+            
         try:
             lemma_src = token.get('lemma_src')
         except:
@@ -361,57 +404,359 @@ def renum_xml(inputfile, outputfile):
     reorderAttrib(root)
     ET.ElementTree(root).write(outputfile, encoding="utf-8")
 
-def valid_xml(inputfile, phase):
+def make_coherence_table(path_corrTable):
+    CorrTable = open(path_corrTable, encoding='utf-8')
+    l = []
+    for i in CorrTable:
+        i = i.split(",")
+        l.append((i[2], i[3], i[4]))
+
+    l.append(('','_', '_'))
+    l.append((None,None,None))
+
+    CorrTable.close()
+
+    return l
+
+def check_coherence(l, prpos, uppos, udpos):
+    
+    global incoherence
+    incoherence = False
+    
+    if udpos == 'PUNCT' or udpos == 'PROPN':
+        pass
+    elif (prpos, uppos, udpos) not in l:
+        if udpos == 'VERB':
+            if (prpos, uppos, 'AUX') not in l:
+                incoherence = True
+        elif udpos == 'AUX':
+            if (prpos, uppos, 'VERB') not in l:
+                incoherence = True
+        else:
+            incoherence = True
+    
+    return incoherence
+
+def valid_xml(inputfile):
+
+    tree = ET.parse(open(inputfile, encoding='utf-8'))
+    root = tree.getroot()
+    format_tag_text(root)
+    indent_xml(root)
+    reorderAttrib(root)
+    ET.ElementTree(root).write(inputfile, encoding="utf-8")
 
     l_upos = ["ADJ","ADP","PUNCT","ADV",
              "AUX","SYM","INTJ","CCONJ",
              "X","NOUN","DET","PROPN",
              "NUM","VERB","PART","PRON",
              "SCONJ"]
+    
+    l_upenn = ["ADJ", "ADJNUM", "ADJR", "ADJS",
+               "ADJZ", "ADV", "ADVNEG", "ADVR",
+               "ADVS", "CONJO", "CONJS", "D",
+               "DZ", "PON", "PONFP", "ITJ", 
+               "NEG", "NUM", "NCS", "NCPL", 
+               "NPRS", "NPRPL", "PRO", "Q",
+               "QR", "QS", "AG", "AJ",
+               "APP", "AX", "EG", "EJ",
+               "EPP", "EX", "MDG", "MDJ",
+               "MDPP", "MDX", "VG", "VJ",
+               "VPP", "VX", "WADV", "WD", "WPRO", 'P', 'WH']
+    
+    l_prpos = ["Ag", "As", "Mc", "Mo", "Rg", "Rp", "Ga", "Ge",
+               "Vvc", "Vuc", "Vvn", "Vun", "Pp", "Pr", "Pd", "Pi", 
+               "Ps", "Pt", "S", "Cs", "Cc", "Da", "Di", "Dn",
+               "Ds", "S+Da", "Nc", "Np", "Rp", "Fw", "Fs", "Fo",
+               "Rt", "Dt", "Dr", "Xa", "Xe", "INT", "Dd", "S+Di", "Dp", "S+Pr", "S+Dn"]
+    
+    path_CorrTable = 'ressources/MICLE_CorrTable_coherence_26.10.23.csv'
 
+    list_coherence = make_coherence_table(path_CorrTable)
+
+    l_error = []
+    incoherence_error = []
+
+    error_cnt = 0
+    with open(inputfile) as f:
+        lines = list(f)
+    for id_, line in enumerate(lines):
+        line = line.replace('\t', '').replace('\n', '')
+        if line.startswith('<w'):
+            if line.endswith('/>'):
+                print('\n'+'Empty token in the line: '+str(id_+1))
+                print(line)
+                error_cnt += 1
+            elif '><' in line:
+                print('\n'+'Empty token in the line: '+str(id_+1))
+                print(line)
+                error_cnt += 1
+            elif not line.endswith('/w>'):
+                lines[id_+1] = lines[id_+1].replace('\t', '').replace('\n', '')
+                lines[id_+2] = lines[id_+2].replace('\t', '').replace('\n', '')
+                lines[id_+3] = lines[id_+3].replace('\t', '').replace('\n', '')
+                lines[id_+4] = lines[id_+4].replace('\t', '').replace('\n', '')
+                lines[id_+5] = lines[id_+5].replace('\t', '').replace('\n', '')
+                if id_+1 < len(lines) and id_+2 < len(lines) and id_+3 < len(lines) and id_+4 < len(lines) and id_+5 < len(lines):
+                    if lines[id_+1].startswith('<hi') and lines[id_+2].endswith('</w>'):
+                        pass
+                    elif lines[id_+1].startswith('<choice') and lines[id_+2].startswith('<sic') and lines[id_+3].startswith('<corr') and lines[id_+5].endswith('</w>'):
+                        pass
+                    elif lines[id_+1].startswith('<foreign') and lines[id_+2].endswith('</w>'):
+                        pass
+                    elif lines[id_+1].startswith('<foreign') and lines[id_+2].startswith('<hi') and lines[id_+4].endswith('</w>'):
+                        pass
+                    else:
+                        print('\n'+'Empty token in the line: '+str(id_+1))
+                        print(line)
+                        error_cnt += 1
+
+    if error_cnt !=0:
+        sys.exit('\n'+"Error in XML file, see comment above.")
     
     error_cnt = 0
     with open(inputfile) as f:
         for id_, line in enumerate(f):
             line = line.lstrip('\t')
             if line.startswith('<w'):
-                s_udpos_content = re.findall('udpos=\"([^\"]*)\"', line)
-                if phase == "lemma" or phase == "convTags":
-                    if s_udpos_content==[]:
-                        print('No udpos attribut inside the line: '+str(id_+1))
-                        print(line)
-                        error_cnt += 1
-                    try:
-                        if s_udpos_content[0] in l_upos:
-                            pass 
-                        else:
-                            print('Error in the POS class inside line: '+str(id_+1))
-                            print(line)
-                            error_cnt +=1
-                    except:
-                        pass
 
-                s_lemma_content = re.findall('lemma=\"([^\"]*)\"', line)
-                if phase == "convTags":
-                    if s_lemma_content==[]:
-                        print('No lemma attribut inside the line: '+str(id_+1))
+                s_udpos_content = re.findall('udpos=\"([^\"]*)\"', line)
+                    
+                if s_udpos_content==[]:
+                    print('No udpos attribut inside the line: '+str(id_+1))
+                    print(line)
+                    # temp_error.append('\n'.join(['No udpos attribut inside the line: '+str(id_+1), line]))
+                    error_cnt += 1
+                try:
+                    if s_udpos_content[0] in l_upos:
+                        pass 
+                    else:
+                        print('Error in the POS class inside line: '+str(id_+1))
                         print(line)
-                        error_cnt += 1
-                    try:
-                        if s_lemma_content[0] != "_" and s_lemma_content[0] != "":
-                            pass
-                        elif s_lemma_content[0] == "_":
-                            print('Please check lemma attribut inside line: '+str(id_+1))
-                            print(line)
-                        elif s_lemma_content[0] == "":
-                            print('Empty lemma attribut inside line: '+str(id_+1))
-                            print(line)
-                            error_cnt +=1
-                    except:
-                        pass
+                        error_cnt +=1
+                except:
+                    pass
 
     if error_cnt !=0:
-        sys.exit("Error in XML file, see comment above.")    
+        sys.exit("Error in XML file, see comment above.")
+
+    error_cnt = 0
+    with open(inputfile) as f:
+        for id_, line in enumerate(f):
+            line = line.lstrip('\t')
+            if line.startswith('<w'):
+
+                s_uppos_content = re.findall('uppos=\"([^\"]*)\"', line)
+
+                if s_uppos_content==[]:
+                    print('No uppos attribut inside the line: '+str(id_+1))
+                    print(line)
+                    error_cnt += 1
+                try:
+                    if s_uppos_content[0] in l_upenn:
+                        pass 
+                    else:
+                        print('Error in the UPPOS class inside line: '+str(id_+1))
+                        print(line)
+                        error_cnt +=1
+                except:
+                    pass
+
+    if error_cnt !=0:
+        sys.exit("Error in XML file, see comment above.")
+
+    error_cnt = 0
+    with open(inputfile) as f:
+        for id_, line in enumerate(f):
+            line = line.lstrip('\t')
+            if line.startswith('<w'):
+
+                s_prpos_content = re.findall('prpos=\"([^\"]*)\"', line)
+
+                if s_prpos_content==[]:
+                    print('No prpos attribut inside the line: '+str(id_+1))
+                    print(line)
+                    error_cnt += 1
+                try:
+                    if s_prpos_content[0] in l_prpos:
+                        pass 
+                    else:
+                        print('Error in the PRPOS class inside line: '+str(id_+1))
+                        print(line)
+                        error_cnt +=1
+                except:
+                    pass
+        
+    if error_cnt !=0:
+        sys.exit("Error in XML file, see comment above.")
+
+    error_cnt = 0
+    with open(inputfile) as f:
+        for id_, line in enumerate(f):
+            line = line.lstrip('\t')
+            if line.startswith('<w'):
+
+                s_udpos_content = re.findall('udpos=\"([^\"]*)\"', line)
+                s_prpos_content = re.findall('prpos=\"([^\"]*)\"', line)
+                s_uppos_content = re.findall('uppos=\"([^\"]*)\"', line)
+
+                incoherence = check_coherence(list_coherence, s_prpos_content[0], s_uppos_content[0], s_udpos_content[0])
+                if incoherence == True:
+                    print('POS incoherence inside the line: '+str(id_+1))
+                    print(line)
+                    # incoherence_error.append('\n'.join(['POS incoherence inside the line: '+str(id_+1), line]))
+                    error_cnt += 1
+
+    if error_cnt !=0:
+        sys.exit("Error in XML file, see comment above.")
+    
+    error_cnt = 0
+    with open(inputfile) as f:
+        for id_, line in enumerate(f):
+            line = line.lstrip('\t')
+            if line.startswith('<w'):
+
+                s_lemma_content = re.findall('lemma=\"([^\"]*)\"', line)
+                
+                if s_lemma_content==[]:
+                    print('No lemma attribut inside the line: '+str(id_+1))
+                    print(line)
+                    error_cnt += 1
+                try:
+                    if s_lemma_content[0] != "_" and s_lemma_content[0] != "":
+                        pass
+                    elif s_lemma_content[0] == "_":
+                        print('Please check lemma attribut inside line: '+str(id_+1))
+                        print(line)
+                    elif s_lemma_content[0] == "":
+                        print('Empty lemma attribut inside line: '+str(id_+1))
+                        print(line)
+                        error_cnt +=1
+                except:
+                    pass
+
+    if error_cnt !=0:
+        sys.exit("Error in XML file, see comment above.")
+
+    # write = input('Write a text file ? (y or n)')
+
+    # if write == 'y':
+    #     pass
+
+
+def conversion_xml2conllu_group(inputfile, outputfile):
+    # On ouvre le fichier de sortie
+    with open(outputfile, 'w', encoding="utf-8") as conll:
+
+    # On importe le XML-TEI d'entrée et on le lit.
+        tree = ET.parse(open(inputfile, encoding="utf-8"))
+        root = tree.getroot()
+
+        for group in root.findall('.//group'):
+            group_id = group.get('n')
+
+            for sentence in group.findall('.//s'):
+                sent_id = sentence.get('sent_id')
+                sent_len = sentence.get('len')
+            
+                conll.write('\n'+'# sent_id = '+ sent_id+'\n')
+                conll.write('# sent_len = '+ sent_len+'\n')
+                conll.write('# group = '+ group_id+'\n')
+
+                for word in sentence:
+                    #On récupère les numéros de tokens
+                    word_nb = word.get('n')                                                             
+
+                    #On récupère les lemmes ; sinon, on laisse vide.
+
+                    try:
+                        dictlemma = {"lemma": word.get('lemma')}
+                    except:
+                        dictlemma = {"lemma": "_"}
+                    if str(dictlemma["lemma"]) == "None":
+                        lemma = "_"
+                    else:    
+                        lemma = str(dictlemma["lemma"])
+
+                    #On récupère les udpos ; sinon, on laisse vide.
+
+                    try:
+                        dictudpos = {"udpos": word.get('udpos')}
+                    except:
+                        dictudpos = {"udpos": "_"}
+                    if str(dictudpos["udpos"]) == "None":
+                        udpos = "_"
+                    else:    
+                        udpos = str(dictudpos["udpos"])
+
+                    #On récupère les uppos ; sinon, on laisse vide.
+
+                    try:
+                        dictuppos = {"uppos": word.get('uppos')}
+                    except:
+                        dictuppos = {"uppos": "_"}
+                    if str(dictuppos["uppos"]) == "None":
+                        uppos = "_"
+                    else:    
+                        uppos = str(dictuppos["uppos"])   
+
+                    #On récupère les head ; sinon, on laisse vide.
+
+                    try:
+                        dicthead = {"head": word.get('head')}
+                    except:
+                        dicthead = {"head": "_"}
+                    if str(dicthead["head"]) == "None":
+                        head = "_"
+                    else:    
+                        head = str(dicthead["head"])
+
+                    #On récupère les function ; sinon, on laisse vide.
+
+                    try:
+                        dictfunction = {"function": word.get('function')}
+                    except:
+                        dictfunction = {"function": "_"}
+                    if str(dictfunction["function"]) == "None":
+                        function = "_"
+                    else:    
+                        function = str(dictfunction["function"])
+
+                    #On récupère les prpos ; sinon, on laisse vide.
+
+                    try:
+                        dictprpos = {"prpos": word.get('prpos')}
+                    except:
+                        dictprpos = {"prpos": "_"}
+                    if str(dictprpos["prpos"]) == "None":
+                        prpos = "_"
+                    else:    
+                        prpos = str(dictprpos["prpos"]).rstrip('\n')
+
+                    #On récupère les join ; sinon, on laisse vide.
+
+                    try:
+                        dictjoin = {"join": word.get('join')}
+                    except:
+                        dictjoin = {"join": "_"}
+                    if str(dictjoin["join"]) == "None":
+                        join = "_"
+                    else:    
+                        join = str(dictjoin["join"]).rstrip('\n')
+
+                    #On récupère le mot-forme. S'il y a des enfants, on concatène.
+
+                    form = get_word_form(word)
+                    #dev 
+                    print(form)
+                    mot = word_nb+"\t"+form.replace("\t", "").replace("\n", "")+"\t"+lemma+"\t"+udpos+"\t"+uppos+"\t_\t"+head+"\t"+function+"\t_\tjoin="+join+"|prpos="+prpos+"\n"          
+
+                    strmot = str(mot)
+
+                    #On écrit le fichier de sortie
+
+                    conll.write(strmot)
+
 
 def conversion_xml2conllu(inputfile, outputfile):
     # On ouvre le fichier de sortie
@@ -550,7 +895,8 @@ def conversion_xml2conllu(inputfile, outputfile):
                                 #On récupère le mot-forme. S'il y a des enfants, on concatène.
 
                                 form = get_word_form(word)
-                                #dev print(form)
+                                #dev 
+                                print(form)
                                 mot = word_nb+"\t"+form.replace("\t", "").replace("\n", "")+"\t"+lemma+"\t"+udpos+"\t"+uppos+"\t_\t"+head+"\t"+function+"\t_\tjoin="+join+"|prpos="+prpos+"\n"          
 
                                 strmot = str(mot)
@@ -815,7 +1161,6 @@ def synchronisation_xml(functionw, xmlw, compil, option):
     coord={}
     #coord2={}
     #roots=[]
-    
        
     # On importe le XML-TEI d'entrée avec les fonctions et on le lit.
     tree = ET.parse(open(functionw, encoding="utf-8"))
@@ -865,9 +1210,7 @@ def synchronisation_xml(functionw, xmlw, compil, option):
 
 
    #XML sans fonction
-                    
-
-       
+                           
     # On importe le XML-TEI d'entrée et on le lit.
     tree2 = ET.parse(open(xmlw, encoding="utf-8"))
     root = tree2.getroot()
@@ -967,6 +1310,51 @@ def synchronisation_xml(functionw, xmlw, compil, option):
     #ET.dump(tree)
     reorderAttrib(tree2)
     tree2.write(compil, pretty_print=True, encoding="utf-8")
+
+def add_sent_id(inputfile, outputfile):
+
+    ns_map = {'tei': 'http://www.tei-c.org/ns/1.0'}
+
+    #import xml.etree.ElementTree as ET
+    from lxml import etree as ET
+       
+    # On importe le XML-TEI d'entrée avec les fonctions et on le lit.
+    tree = ET.parse(open(inputfile, encoding="utf-8"))
+    root = tree.getroot()
+
+#On cible les books, et on récupère l'attribut n
+
+    for book in root.findall('.//div[@type="book"]'):
+        book_nb = book.get('n')
+
+    # On cible les chapter, et on récupère l'attribut n
+
+        for chapter in book.findall('.//div[@type="chapter"]'):
+            chapter_nb = chapter.get('n')
+
+            # On cible les sections, et on récupère l'attribut n
+
+            for section in chapter.findall('.//div[@type="section"]'):
+                section_nb = section.get('n')
+
+
+                #On cible les paragraphes, et on récupère l'attribut n
+
+                for para in section.findall('.//p'):
+                    para_nb = para.get('n')
+
+                        #On cible les sentences, et on récupère l'attribut n
+
+                    for sentence in para.findall('.//s'):
+                        sentence_nb = sentence.get('n')
+
+                            # On boucle sur les w
+
+                        sent_id = book_nb+"_"+chapter_nb+"_"+section_nb+"_"+para_nb+"_"+sentence_nb
+
+                        sentence.set("sent_id", sent_id)
+    
+    ET.ElementTree(root).write(outputfile, encoding="utf-8")
 
 ### Lemmatisation/Conversion tagsets ##########################
 def make_d_PRESTO(path_PRESTO):
@@ -1122,10 +1510,27 @@ def resolv_ambi(inputfile, outputfile):
                 id_parent = w.get('n')
 
                 for w2 in root.findall('.//s')[id_]:
+
                     if w2.get('head') == id_parent and (w2.get('function') == 'nsubj' or w2.get('function') == 'expl'):
-                        w.set('uppos', 'VJ')
-                        w.set('prpos', 'Vvc')
-                        w.set('ambiguite', 'subj')
+                        for w3 in root.findall('.//s')[id_]:
+                            if w3.get('head') == id_parent and w3.get('udpos') == 'AUX' and w3.get('function') in l_function_AUX and w3.get('lemma') in l_lemma_AUX:
+                                b_spot_aux = True
+                        
+                        if b_spot_aux == False:
+                            w.set('uppos', 'VJ')
+                            w.set('prpos', 'Vvc')
+                            w.set('ambiguite', 'subj')
+                        else:                        
+                            if w.get('lemma')=='être':
+                                w.set('uppos', 'EPP')
+                                w.set('prpos', 'Ge')
+                            elif w.get('lemma')=='avoir':
+                                w.set('uppos', 'APP')
+                                w.set('prpos', 'Ge')
+                            else:
+                                w.set('uppos', 'VPP')
+                                w.set('prpos', 'Ge')
+                            w.set('ambiguite', 'subj')
                 
                     elif w2.get('n') == head_parent and w2.get('udpos') == 'VERB' and w2.get('uppos') == 'VPP' :
                         id_parent = w2.get('n')
@@ -1155,7 +1560,6 @@ def resolv_ambi(inputfile, outputfile):
                             w.set('prpos', 'Vvc')
                         w.set('ambiguite', 'conj2')
 
-            
             # xcomp
             if w.get('uppos') ==  'VPP///VJ' and w.get('function') ==  'xcomp':
                 
@@ -1175,8 +1579,8 @@ def resolv_ambi(inputfile, outputfile):
                     w.set('ambiguite', 'xcomp1')
                     
                 elif b_spot_aux == True:
-                    w.set('uppos', 'VJ')
-                    w.set('prpos', 'Vvc')
+                    w.set('uppos', 'VPP')
+                    w.set('prpos', 'Ge')
                     w.set('ambiguite', 'xcomp2')
 
             
@@ -1194,9 +1598,16 @@ def resolv_ambi(inputfile, outputfile):
                         b_spot_aux = True
 
                 if b_spot_aux == False:
-                    w.set('uppos', 'VJ')
-                    w.set('prpos', 'Vvc')
-                    w.set('ambiguite', 'advcl1')
+                    if w.get('lemma')=='être':
+                        w.set('uppos', 'EJ')
+                        w.set('prpos', 'Vuc')
+                    elif w.get('lemma')=='avoir':
+                        w.set('uppos', 'AJ')
+                        w.set('prpos', 'Vuc')
+                    else:
+                        w.set('uppos', 'VJ')
+                        w.set('prpos', 'Vvc')
+                        w.set('ambiguite', 'advcl1')
                     
                 elif b_spot_aux == True:
                     if w.get('lemma')=='être':
@@ -1223,12 +1634,12 @@ def resolv_ambi(inputfile, outputfile):
             #             w.set('ambiguite', 'acl')
             
             # Pr
-            # if w.get('prpos') ==  'Pr///Pt' and s.findall('.//w')[len(s)-1].text =='?':
-            #     w.set('prpos', 'Pt')
-            #     w.set('ambiguite', "PronType")
-            # elif w.get('prpos') ==  'Pr///Pt':
-            #     w.set('prpos', 'Pr')
-            #     w.set('ambiguite', "PronType")
+            if w.get('prpos') ==  'Pr///Pt' and s.findall('.//w')[len(s)-1].text =='?':
+                w.set('prpos', 'Pt')
+                w.set('ambiguite', "PronType")
+            elif w.get('prpos') ==  'Pr///Pt':
+                w.set('prpos', 'Pr')
+                w.set('ambiguite', "PronType")
 
     indent_xml(root)
 

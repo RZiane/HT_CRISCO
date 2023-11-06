@@ -1,9 +1,10 @@
 import itertools, sys
 from lxml import etree as ET
-from utils import indent_xml, def_args, make_d_PRESTO, make_d_CorrTable, valid_xml, get_word_form, preprocess_word_form
+from utils import indent_xml, def_args, make_d_PRESTO, make_d_CorrTable, valid_xml, get_word_form, preprocess_word_form, renum_xml
 from tqdm import tqdm
 
 path_PRESTO = "/home/ziane212/projects/data/crisco/dico_PRESTO_SIMPLE_05.05.23.dff"
+# path_PRESTO = "/home/ziane212/Téléchargements/1563_Guernesey_dict.dff"
 path_CorrTable = "/home/ziane212/projects/data/crisco/MICLE_CorrTable_27-02-23.csv"
 '''
 path_PRESTO = "C:/Users/yagam/Desktop/crisco_ressources/dico_PRESTO_SIMPLE_05.05.23.dff"
@@ -46,57 +47,59 @@ def process_lemmatisation(inputfile, outputfile, d_CorrTable, d_PRESTO):
         #dev print(s_token)
         #dev print(s_udpos)
         # test de matching dans le dictionnaire
-        if s_token in d_PRESTO.keys():
-            # résolution de l'ambiguité en comparant l'étiquette POS UD avec celle dans le dictionnaire PRESTO
-            if len(d_PRESTO[s_token]) != 1: # si plusieurs valeurs pour une entrée dans le dictionnaire alors ambiguité
-                for entry in d_PRESTO[s_token]: # itération des valeurs pour l'entrée
+        if w.get('lemma')=='_':
+            w.set('presto', 'yes')
+            if s_token in d_PRESTO.keys():
+                # résolution de l'ambiguité en comparant l'étiquette POS UD avec celle dans le dictionnaire PRESTO
+                if len(d_PRESTO[s_token]) != 1: # si plusieurs valeurs pour une entrée dans le dictionnaire alors ambiguité
+                    for entry in d_PRESTO[s_token]: # itération des valeurs pour l'entrée
+                        for tag in d_CorrTable[s_udpos]:
+                            lemmatisation(entry, tag, list_prpos, list_prfeat, list_lemma)
+
+                else:
                     for tag in d_CorrTable[s_udpos]:
-                        lemmatisation(entry, tag, list_prpos, list_prfeat, list_lemma)
-
-            else:
-                for tag in d_CorrTable[s_udpos]:
-                    lemmatisation(d_PRESTO[s_token][0], tag, list_prpos, list_prfeat, list_lemma)
-        
-        # absence du verbe dans presto
-        else:
-            w.attrib['NoMatchingPresto'] = 'Word'
-        
-        list_lemma = list(sorted(set(list_lemma)))
-        
-        if list_lemma != []:
-
-            if len(list_lemma) > 1:
-                s_lemma = '///'.join(list_lemma)
-            else:
-                s_lemma = list_lemma[0]
-
-            # Gestion de l'absence de conversion de l'étiquette UPenn
-            try:
-                w.attrib['lemma'] = s_lemma
-            except NameError:
-                s_lemma = '_'
-                w.attrib['lemma'] = s_lemma
-        
-        elif list_lemma == [] and w.get('NoMatchingPresto')!='Word':
+                        lemmatisation(d_PRESTO[s_token][0], tag, list_prpos, list_prfeat, list_lemma)
             
-            if s_udpos=='PROPN' or s_udpos=='PUNCT':
-                s_lemma = w.text
-                w.attrib['lemma'] = s_lemma
+            # absence du verbe dans presto
             else:
-                s_lemma = '_'
-                w.attrib['lemma'] = s_lemma
+                w.attrib['NoMatchingPresto'] = 'Word'
+            
+            list_lemma = list(sorted(set(list_lemma)))
+            
+            if list_lemma != []:
 
-                w.attrib['NoMatchingPresto'] = 'POS'
+                if len(list_lemma) > 1:
+                    s_lemma = '///'.join(list_lemma)
+                else:
+                    s_lemma = list_lemma[0]
+
+                # Gestion de l'absence de conversion de l'étiquette UPenn
+                try:
+                    w.attrib['lemma'] = s_lemma
+                except NameError:
+                    s_lemma = '_'
+                    w.attrib['lemma'] = s_lemma
+            
+            elif list_lemma == [] and w.get('NoMatchingPresto')!='Word':
                 
-        elif list_lemma == [] and w.get('NoMatchingPresto')=='Word':
-            
-            if s_udpos=='PROPN' or s_udpos=='PUNCT':
-                s_lemma = s_token
-                w.attrib['lemma'] = s_lemma
-                w.attrib.pop('NoMatchingPresto')
-            else:
-                s_lemma = '_'
-                w.attrib['lemma'] = s_lemma
+                if s_udpos=='PROPN' or s_udpos=='PUNCT':
+                    s_lemma = w.text
+                    w.attrib['lemma'] = s_lemma
+                else:
+                    s_lemma = '_'
+                    w.attrib['lemma'] = s_lemma
+
+                    w.attrib['NoMatchingPresto'] = 'POS'
+                    
+            elif list_lemma == [] and w.get('NoMatchingPresto')=='Word':
+                
+                if s_udpos=='PROPN' or s_udpos=='PUNCT':
+                    s_lemma = s_token
+                    w.attrib['lemma'] = s_lemma
+                    w.attrib.pop('NoMatchingPresto')
+                else:
+                    s_lemma = '_'
+                    w.attrib['lemma'] = s_lemma
         
 
         '''
@@ -114,10 +117,12 @@ def process_lemmatisation(inputfile, outputfile, d_CorrTable, d_PRESTO):
 
 if __name__ == "__main__":
    inputfile, outputfile = def_args(sys.argv[1:])
-   valid_xml(inputfile, "lemma")
+   renum_xml(inputfile, inputfile)
+#    valid_xml(inputfile, "lemma")
    d_CorrTable = make_d_CorrTable(path_CorrTable)
    print("Processing dictionnary...")   
    d_PRESTO = make_d_PRESTO(path_PRESTO)
    print("Processing file...")
    process_lemmatisation(inputfile, outputfile, d_CorrTable, d_PRESTO)
+   print("Done")
         

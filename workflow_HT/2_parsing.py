@@ -4,7 +4,7 @@ from tkinter import ttk
 import time
 from hopsparser import parser
 import os
-from tools.utils import conversion_xml2conllu, conversion_conllu2xml, synchronisation_xml, renum_xml
+from tools.utils import conversion_xml2conllu, conversion_conllu2xml, synchronisation_xml, renum_xml, drop_head
 
 def parsefile(input_path, output_path, model_path):
     parser.parse(
@@ -13,7 +13,7 @@ def parsefile(input_path, output_path, model_path):
             out_file=output_path
         )
     
-def parse():
+def parse(mode='reparse'):
     pb.pack()
     for i in range(5):
         fenetre_options_parsing.update_idletasks()
@@ -36,6 +36,9 @@ def parse():
             output_xml_tempfile =  path+'/'+filename+'_temp.xml'
             
             renum_xml(input_path, input_path)
+            if mode == 'reparse':
+                drop_head(input_path, input_path)
+
             conversion_xml2conllu(input_path, input_conllu_tempfile)
 
             print('Parsing...')
@@ -43,7 +46,7 @@ def parse():
             print('Parsing done')
             conversion_conllu2xml(output_conllu_tempfile, output_xml_tempfile)
 
-            synchronisation_xml(output_xml_tempfile, input_path, output_path, 'reparse')
+            synchronisation_xml(output_xml_tempfile, input_path, output_path, mode)
             print('Conversion done')
             pb.destroy()
 
@@ -53,6 +56,9 @@ def parse():
         output_xml_tempfile = input_path.rstrip('.xml')+'_temp.conllu'
 
         renum_xml(input_path, input_path)
+        if mode == 'reparse':
+            drop_head(input_path, input_path)
+
         conversion_xml2conllu(input_path, input_conllu_tempfile)
 
         print('Parsing...')
@@ -60,7 +66,7 @@ def parse():
         print('Parsing done')
         conversion_conllu2xml(output_conllu_tempfile, output_xml_tempfile)
 
-        synchronisation_xml(output_xml_tempfile, input_path, output_path, 'reparse')
+        synchronisation_xml(output_xml_tempfile, input_path, output_path, mode)
         print('Conversion done')
         pb.destroy()
         
