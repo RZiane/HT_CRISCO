@@ -343,7 +343,7 @@ def process_conversion(inputfile, outputfile, d_CorrTable, d_PRESTO):
 if __name__ == "__main__":
    inputfile, outputfile = def_args(sys.argv[1:])
    # global d_CorrTable
-   valid_xml(inputfile, "convTags")
+   # valid_xml(inputfile, "convTags")
    d_CorrTable = make_d_CorrTable(path_CorrTable)
    print("Processing dictionnary...")
    d_PRESTO = make_d_PRESTO(path_PRESTO)

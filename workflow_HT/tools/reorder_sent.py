@@ -1,6 +1,6 @@
 import sys
 from utils import def_args
-from tools.extract_sent_from_xml import order_sent_size
+from extract_sent_from_xml import order_sent_size
                 
 if __name__ == "__main__":
    inputfile, outputfile = def_args(sys.argv[1:])
