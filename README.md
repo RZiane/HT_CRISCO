@@ -73,6 +73,8 @@ Since the sentence segmentation and token structure of the text are likely to ha
 
 # For further information
 
+Larrivée P. Intelligence artificielle et histoire de la langue française, 17 October 2023. [Video](https://www.canal-u.tv/chaines/la-forge-numerique/intelligence-artificielle-et-histoire-de-la-langue-francaise)
+
 Ziane R., Romanova N., Lavergne M. En dialogue avec les outils d'apprentissage automatique: une chaîne de traitement pour l'annotation syntaxique. Journée d'études CRISCO axe 2, 8 june 2023. [Workshop slides](https://crisco.unicaen.fr/wp-content/uploads/sites/43/2023/07/Journee-CRISCO_8.6.23-Ziane-Romanova-Lavergne.pdf)
 
 Ziane R., Romanova N. Vers l’intégration des outils d’annotation syntaxique : proposition d’une chaîne de traitement itérative pour faciliter l’adoption et l’accès aux technologies d’apprentissage automatique Actes des 11èmes Journées Internationales de Linguistique de Corpus, 3-7 juillet 2023, pp. 278-383 [Conference booklet](https://jlc2023.sciencesconf.org/data/pages/abstracts_JLC_2024.pdf)
