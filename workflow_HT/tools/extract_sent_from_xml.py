@@ -37,15 +37,15 @@ def extract_lg(inputfile, outputfile):
             text_sent.append(form)
         
         if len_sent > 80:
-            x = str(nb_sent)+' \ len: '+str(len_sent)+' \ Long= Yes'+'\n'+' '.join(text_sent)
+            x = str(nb_sent)+' \ len: '+str(len_sent)+' \ Long= Yes \ '+'sent_id='+sent.attrib['sent_id']+'\n'+' '.join(text_sent)
             list_sents.append(x)
         else:
             x = str(nb_sent)+' \ len: '+str(len_sent)+'\n'+' '.join(text_sent)
             list_sents.append(x)                
         
-    outputfile = outputfile.rstrip('.txt')+'.txt'
+    outputfile_txt = outputfile.rstrip('.xml')+'.txt'
 
-    with open(outputfile, "w", encoding="utf-8") as out:
+    with open(outputfile_txt, "w", encoding="utf-8") as out:
         for i in list_sents:
             out.write(i)
             out.write('\n')
@@ -198,4 +198,5 @@ def extract_stats(inputfile):
 if __name__ == "__main__":
    inputfile, outputfile = def_args(sys.argv[1:])
    extract_lg(inputfile, outputfile)
+   order_sent_size(inputfile, outputfile)
    extract_stats(inputfile)

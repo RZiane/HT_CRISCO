@@ -423,12 +423,12 @@ def saveFile():
     print(punct_forte_selec)
 
     if punct_forte_selec == []:
-        regex_split_sents = r'\s*(\S.{1,}?(?:[0-9a-zàáâäçèéêëîïôöùúûüÿ\»\)\]\s]\.\s?\»?\"?|$))(?=(?:\s+[&A-ZÀÁÂÄÇÈÉÊÌÍÎÏÒÓÔÖÙÚ])|$)'
+        regex_split_sents = r'\s*(\S.{1,}?(?:[0-9a-zàáâäçèéêëîïôöùúûüÿ\»\)\]\s]\.\s?\»?\"?|$))(?=(?:\s+[—&A-ZÀÁÂÄÇÈÉÊÌÍÎÏÒÓÔÖÙÚ])|$)'
         print("1")
     else:
         segmenteur = ''.join(punct_forte_selec)
         print("2")
-        regex_split_sents = r'\s*(\S.{1,}?(?:[0-9a-zàáâäçèéêëîïôöùúûüÿ\»\)\]\s\.](?:['+segmenteur+r"])\s?\»?\"?|$))(?=(?:\s+[&A-ZÀÁÂÄÇÈÉÊÌÍÎÏÒÓÔÖÙÚa-zàáâäçèéêëîïôöùúûüÿ]|$))"
+        regex_split_sents = r'\s*(\S.{1,}?(?:[0-9a-zàáâäçèéêëîïôöùúûüÿ\»\)\]\s\.](?:['+segmenteur+r"])\s?\»?\"?|$))(?=(?:\s+[—&A-ZÀÁÂÄÇÈÉÊÌÍÎÏÒÓÔÖÙÚa-zàáâäçèéêëîïôöùúûüÿ]|$))"
 
     #dev print(regex_split_sents) 
     

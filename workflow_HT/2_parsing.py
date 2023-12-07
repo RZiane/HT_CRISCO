@@ -13,7 +13,7 @@ def parsefile(input_path, output_path, model_path):
             out_file=output_path
         )
     
-def parse(mode='reparse'):
+def parse(mode='parse'):
     pb.pack()
     for i in range(5):
         fenetre_options_parsing.update_idletasks()

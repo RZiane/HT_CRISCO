@@ -759,11 +759,19 @@ def conversion_xml2conllu_group(inputfile, outputfile):
                         else:    
                             join = str(dictjoin["join"]).rstrip('\n')
 
-                        #On récupère le mot-forme. S'il y a des enfants, on concatène.
+                        if join == '_' and prpos == '_':
+                            s_misc = '_'
+                        elif join == '_' and prpos != '_':
+                            s_misc = 'prpos='+prpos
+                        elif join != '_' and prpos == '_':
+                            s_misc = 'join='+join
+                        elif join != '_' and prpos != '_':
+                            s_misc = 'join='+join+'|prpos='+prpos
 
                         form = get_word_form(word)
-                        #dev print(form)
-                        mot = word_nb+"\t"+form.replace("\t", "").replace("\n", "")+"\t"+lemma+"\t"+udpos+"\t"+uppos+"\t_\t"+head+"\t"+function+"\t_\tjoin="+join+"|prpos="+prpos+"\n"          
+                        #dev 
+                        print(form)
+                        mot = word_nb+"\t"+form.replace("\t", "").replace("\n", "")+"\t"+lemma+"\t"+udpos+"\t"+uppos+"\t_\t"+head+"\t"+function+"\t_\t"+s_misc+"\n"   
 
                         strmot = str(mot)
 
@@ -814,10 +822,10 @@ def conversion_xml2conllu(inputfile, outputfile):
                             sentence_ch = int(sentence_nb)
 
                             if book_ch == chapter_ch == section_ch == para_ch == sentence_ch == 1:
-                                balise_sent = '# sent_id = '+book_nb+'-'+chapter_nb+'-'+section_nb+'-'+para_nb+'-'+sentence_nb+'\n'
+                                balise_sent = '# sent_id = '+book_nb+'_'+chapter_nb+'_'+section_nb+'_'+para_nb+'_'+sentence_nb+'\n'
 
                             else:
-                                balise_sent = '\n# sent_id = '+book_nb+'-'+chapter_nb+'-'+section_nb+'-'+para_nb+'-'+sentence_nb+'\n'
+                                balise_sent = '\n# sent_id = '+book_nb+'_'+chapter_nb+'_'+section_nb+'_'+para_nb+'_'+sentence_nb+'\n'
 
                             conll.write(balise_sent)
 
@@ -906,11 +914,49 @@ def conversion_xml2conllu(inputfile, outputfile):
                                 else:    
                                     join = str(dictjoin["join"]).rstrip('\n')
 
+                                # info_token[9] = info_token[9].rstrip('\n')
+                                # misc_temp = info_token[9].split('|')
+
+                                # misc = {}
+                                
+                                # if join == '_':
+                                #     pass
+                                # else:
+                                #     misc['join'] = join
+
+                                # if prpos == '_':
+                                #     pass
+                                # else:
+                                #     misc['prpos'] = prpos
+
+                                # if misc != {}:
+                                #     for i, j in misc.items():
+                                #         try:
+                                #             if misc[j] == None:
+                                #                 s_misc = "_"
+                                #         except:
+                                #             s_misc += misc[i]+"="+misc[j]
+                                # else:
+                                #     s_misc = "_"
+
+                                #On récupère le mot-forme. S'il y a des enfants, on concatène.
+                                #On récupère les prpos ; sinon, on laisse vide.
+
                                 #On récupère le mot-forme. S'il y a des enfants, on concatène.
 
+                                if join == '_' and prpos == '_':
+                                    s_misc = '_'
+                                elif join == '_' and prpos != '_':
+                                    s_misc = 'prpos='+prpos
+                                elif join != '_' and prpos == '_':
+                                    s_misc = 'join='+join
+                                elif join != '_' and prpos != '_':
+                                    s_misc = 'join='+join+'|prpos='+prpos
+
                                 form = get_word_form(word)
-                                #dev print(form)
-                                mot = word_nb+"\t"+form.replace("\t", "").replace("\n", "")+"\t"+lemma+"\t"+udpos+"\t"+uppos+"\t_\t"+head+"\t"+function+"\t_\tjoin="+join+"|prpos="+prpos+"\n"          
+                                #dev 
+                                print(form)
+                                mot = word_nb+"\t"+form.replace("\t", "").replace("\n", "")+"\t"+lemma+"\t"+udpos+"\t"+uppos+"\t_\t"+head+"\t"+function+"\t_\t"+s_misc+"\n"          
 
                                 strmot = str(mot)
 
@@ -1313,8 +1359,7 @@ def synchronisation_xml(functionw, xmlw, compil, option):
                                 word.attrib['udpos'] = word.attrib.pop('udpos')
                                 word.attrib['join'] = word.attrib.pop('join')
                             
-                            #dev 
-                            print(word.attrib)
+                            #dev print(word.attrib)
 
     # On écrit le TEI obtenu dans le fichier spécifié en second paramètre.
     
