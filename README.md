@@ -15,7 +15,7 @@ To learn more about the project, its annotation programme and the ways to explor
 # Requirements:
 In order to use H-T workflow, you will need to install HOPS parser on your computer by following instructions on the [project's GitHub page](https://github.com/hopsparser/hopsparser) and download the [SRCMF model](https://zenodo.org/record/6542539).
 
-In addition, you will need to download Presto dictionary file ([original](https://unicloud.unicaen.fr/index.php/s/NSkPrcaZ3Rx2t9P) or [revised](https://unicloud.unicaen.fr/index.php/s/YgfYJenQMKD8bEC) versions)\* that is used for lemmatisation and tagset conversion, and the [tagset conversion table](https://unicloud.unicaen.fr/index.php/s/CAdFCbGgGKFHrai). You can download the scripts from the GitHub project or execute them from the GitHub project using an environment such as [GitHub Desktop](https://desktop.github.com/)
+In addition, you will need to download Presto dictionary file ([original](https://unicloud.unicaen.fr/index.php/s/NSkPrcaZ3Rx2t9P) or [revised](https://unicloud.unicaen.fr/index.php/s/YgfYJenQMKD8bEC) versions)\* that is used for lemmatisation and tagset conversion, and the [tagset conversion table](https://unicloud.unicaen.fr/index.php/s/diZm7gHc5L5Yr8J). You can download the scripts from the GitHub project or execute them from the GitHub project using an environment such as [GitHub Desktop](https://desktop.github.com/)
 
 \* Versions of the dictionary produced as part of the [Presto project](http://presto.ens-lyon.fr/). See [Lay M.H.& Pincemin B. (2010)](https://www.ledonline.it/ledonline/JADT-2010/allegati/JADT-2010-1045-1056_106-Lay.pdf).
 
