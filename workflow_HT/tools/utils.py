@@ -954,8 +954,7 @@ def conversion_xml2conllu(inputfile, outputfile):
                                     s_misc = 'join='+join+'|prpos='+prpos
 
                                 form = get_word_form(word)
-                                #dev 
-                                print(form)
+                                #dev print(form)
                                 mot = word_nb+"\t"+form.replace("\t", "").replace("\n", "")+"\t"+lemma+"\t"+udpos+"\t"+uppos+"\t_\t"+head+"\t"+function+"\t_\t"+s_misc+"\n"          
 
                                 strmot = str(mot)
@@ -986,13 +985,10 @@ def conversion_conllu2xml(inputfile, outputfile):
             if 'sent_id' in line:
                 if len(sentence.keys()) != 0:
                     sentence = {}
-                print(line)
-                sentence_str = re.search("\d+-\d+-\d+-\d+-\d+", line).group()
-                num2 = sentence_str.split('-')
-                '''
+
                 sentence_str = re.search("\d+_\d+_\d+_\d+_\d+", line).group()
                 num2 = sentence_str.split('_')
-                '''
+                
                 sentence['book'] = num2[0]
                 sentence['chapter'] = num2[1]
                 sentence['section'] = num2[2]
